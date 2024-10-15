@@ -1,0 +1,18 @@
+<!-- products/templates/products/soft_delete_product.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Product</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Are you sure you want to delete {{ product.name }}?</h2>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            <a href="{% url 'products:product_list' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>

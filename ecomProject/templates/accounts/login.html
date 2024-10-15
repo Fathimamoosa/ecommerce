@@ -1,0 +1,87 @@
+
+
+{% load static %}
+{% load socialaccount %}
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Lustrelux Dashboard</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'backend/assets/imgs/theme/favicon.svg' %}">
+
+    <!-- Template CSS -->
+    <link href="{% static 'backend/assets/css/main.css' %}" rel="stylesheet" type="text/css">
+    <!-- Bootstrap CSS (for layout and styling) -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <main>
+        <!-- Navbar/Header -->
+        <header class="main-header navbar bg-light py-3 shadow-sm">
+            <div class="container">
+                <a href="index-dark.html" class="brand-wrap">
+                    <img src="{% static 'backend/assets/imgs/theme/logo.jpg' %}" class="logo" alt="Lustrelux Dashboard" style="max-height: 50px;">
+                </a>
+            </div>
+        </header>
+
+        <!-- Main Content Section -->
+        <section class="content-main mt-5 mb-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-5 col-md-7">
+                        <div class="card card-login shadow-sm">
+                            <div class="card-body">
+                                <!-- Login Form -->
+                                <h4 class="card-title mb-4 text-center">Login</h4>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    {{ form.as_p }}
+                                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                                </form>
+                                
+                                <!-- Social Login Buttons -->
+                                <ul class="list-inline text-center mt-4">
+                                    <li class="list-inline-item">
+                                        <a href="{% provider_login_url 'google' %}" class="btn btn-google btn-block">
+                                            <i class="fab fa-google"></i> Login with Google
+                                        </a>
+                                    </li>
+                                </ul>
+
+                                <!-- Remember Me & Forgot Password -->
+                                <div class="form-group text-center mt-3">
+                                    <div class="custom-checkbox">
+                                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                                        <label class="form-check-label" for="rememberMe">Remember me</label>
+                                    </div>
+                                    <a class="d-block mt-2" href="{% url 'password_reset' %}">Forgot password?</a>
+                                </div>
+                            </div>
+                            <!-- Register Link -->
+                            <div class="card-footer text-center">
+                                <p>Don't have an account? <a href="{% url 'accounts_register' %}">Register here</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+<!-- verify_otp.html -->
+<form method="POST">
+    {% csrf_token %}
+    <label for="otp_code">Enter OTP:</label>
+    <input type="text" name="otp_code" required>
+    <button type="submit">Verify</button>
+</form>
+
+<p><a href="{% url 'resend_otp' %}">Resend OTP</a></p>

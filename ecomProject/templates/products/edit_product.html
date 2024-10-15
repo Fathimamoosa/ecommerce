@@ -1,0 +1,37 @@
+{% extends 'custom_admin/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<!-- <div class="col-md-3" style = "padding: 50px 0 0 20px;">
+                            
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit">Add</button>
+    </form>
+</div> -->
+
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form|crispy }}
+
+    <label for="image">Upload New Images:</label>
+    <input type="file" name="image" id="image" multiple>
+
+    <h3>Existing Images:</h3>
+    {% for image in existing_images %}
+        <div>
+            <img src="{{ image.image.url }}" alt="Image for {{ product.product_name }}" style="width: 100px; height: auto;">
+            <span> <a href="{% url 'products:delete_image' image.pk %}">Delete</a></span>
+        </div>
+    {% empty %}
+        <p>No images uploaded.</p>
+    {% endfor %}
+
+    <button type="submit">Update Product</button>
+</form>
+
+
+{% endblock %}
+

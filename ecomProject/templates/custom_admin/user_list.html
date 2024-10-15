@@ -1,0 +1,72 @@
+{% extends 'custom_admin/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Users</h2>
+            <p>User list - Block/Unblock</p>
+        </div>
+        <div>
+            <input type="text" placeholder="Search User" class="form-control bg-white">
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+               
+                <div class="col-md-9">
+                    <form method="post" action="{% url 'user_list' %}">
+                        {% csrf_token %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="select-all"/>
+                                            </div>
+                                        </th>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Is Active</th>
+                                        <th>Is Staff</th>
+                                        <th>Is Blocked</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                    <tr>
+                                        <td class="text-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="user_ids" value="{{ user.id }}">
+                                            </div>
+                                        </td>
+                                        <td>{{ user.user_name }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>{{ user.is_active }}</td>
+                                        <td>{{ user.is_staff }}</td>
+                                        <td>{{ user.is_blocked }}</td>
+                                        <td class="text-end">
+                                            <!-- Optional individual actions -->
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Block/Unblock buttons -->
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" name="action" value="block" class="btn btn-danger">Block Selected</button>
+                            <button type="submit" name="action" value="unblock" class="btn btn-success ms-2">Unblock Selected</button>
+                        </div>
+                    </form>
+                </div>
+            </div> <!-- .row // -->
+        </div> <!-- card body .// -->
+    </div> <!-- card .// -->
+</section> <!-- content-main end// -->
+{% endblock %}
