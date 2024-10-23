@@ -13,6 +13,8 @@ from django.contrib.auth import get_backends
 from django.contrib.auth.views import PasswordResetView
 from django.urls import reverse_lazy
 from .models import Profile
+from ecomProject import settings
+from django.utils.crypto import get_random_string
 
 # def send_otp_email(user):
 #     otp_instance = OTP.objects.create(user=user)
@@ -72,31 +74,14 @@ class LogoutView(View):
 
 
 
-def register(request):
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user, backend='custom_admin.auth_backends.EmailBackend')
-            messages.success(request, "Registration successful! You are now logged in.")
-            return redirect('home')  
-        else:
-            messages.error(request, "Please correct the errors below.")
-    else:
-        form = CustomUserCreationForm()
-
-    return render(request, 'accounts/register.html', {'form': form})
-
 # def register(request):
 #     if request.method == 'POST':
 #         form = CustomUserCreationForm(request.POST)
 #         if form.is_valid():
-#             user = form.save(commit=False)  # Do not save to the database yet
-#             user.is_active = False  # Mark user inactive until OTP is verified
-#             user.save()
-#             send_otp_email(user)  # Send OTP to user's email
-#             request.session['user_id'] = user.id  # Store the user ID in session for later use
-#             return redirect('verify_otp')  # Redirect to OTP verification page
+#             user = form.save()
+#             login(request, user, backend='custom_admin.auth_backends.EmailBackend')
+#             messages.success(request, "Registration successful! You are now logged in.")
+#             return redirect('home')  
 #         else:
 #             messages.error(request, "Please correct the errors below.")
 #     else:
@@ -104,48 +89,94 @@ def register(request):
 
 #     return render(request, 'accounts/register.html', {'form': form})
 
+def register(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)  # Do not save to the database yet
+            user.is_active = False  # Mark user inactive until OTP is verified
+            otp = get_random_string(length=6, allowed_chars='1234567890')
+            print(otp)
 
-# def verify_otp(request):
-#     if request.method == 'POST':
-#         otp_code = request.POST.get('otp_code')
-#         user_id = request.session.get('user_id')
-#         user = get_object_or_404(CustomUser, id=user_id)
+            user.save()
+            send_mail( 
+                    'Your OTP Code', 
+                    f"""Dear {user.first_name},
+
+                    Welcome to FADEX.9!
+
+                    Thank you for joining our fashion community. We're excited to have you as a part of the FADEX.9 family, where style meets exclusivity. Our collections are carefully curated with the most unique and hyped apparel that you won't find anywhere else.
+
+                    To complete your registration and start shopping for these exclusive pieces, please verify your email address using the One-Time Password (OTP) provided below:
+
+                    Your OTP: "{otp}"
+
+                    Enter this OTP on our website to verify your account and unlock access to the latest trends in men's fashion.
+
+                    If you have any questions or need assistance, our support team is here to help. Reach out to us anytime at infofadex9@.com.
+
+                    Stay ahead of the fashion curve!
+
+                    Best regards,
+                    The FADEX.9 Team""", 
+                    settings.DEFAULT_FROM_EMAIL, 
+                    [user.email], 
+                    fail_silently=False, 
+                ) 
+
+
+            request.session['user_id'] = user.id  # Store the user ID in session for later use
+            request.session['otp'] = otp  # Store the otp in session for later use
+            return redirect('verify_otp')  # Redirect to OTP verification page
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = CustomUserCreationForm()
+
+    return render(request, 'accounts/register.html', {'form': form})
+
+
+def verify_otp(request):
+    if request.method == 'POST':
+        otp_code = request.POST.get('otp_code')
+        user_id = request.session.get('user_id')
+        user = get_object_or_404(CustomUser, id=user_id)
         
-#         try:
-#             otp_instance = OTP.objects.get(user=user, otp_code=otp_code, is_verified=False)
-#             if otp_instance.is_expired():
-#                 messages.error(request, "OTP expired. Please request a new one.")
-#                 return redirect('verify_otp')
+        try:
+            otp_instance = OTP.objects.get(user=user, otp_code=otp_code, is_verified=False)
+            if otp_instance.is_expired():
+                messages.error(request, "OTP expired. Please request a new one.")
+                return redirect('verify_otp')
 
-#             # OTP is valid
-#             otp_instance.is_verified = True
-#             otp_instance.save()
+            # OTP is valid
+            otp_instance.is_verified = True
+            otp_instance.save()
 
-#             # Activate the user after OTP verification
-#             user.is_active = True
-#             user.save()
+            # Activate the user after OTP verification
+            user.is_active = True
+            user.save()
 
-#             messages.success(request, "OTP verified! Registration complete.")
-#             login(request, user, backend='custom_admin.auth_backends.EmailBackend')
-#             return redirect('home')
-#         except OTP.DoesNotExist:
-#             messages.error(request, "Invalid OTP code. Please try again.")
+            messages.success(request, "OTP verified! Registration complete.")
+            login(request, user, backend='custom_admin.auth_backends.EmailBackend')
+            return redirect('home')
+        except OTP.DoesNotExist:
+            messages.error(request, "Invalid OTP code. Please try again.")
 
-#     return render(request, 'accounts/verify_otp.html')
+    return render(request, 'accounts/verify_otp.html')
 
-# def resend_otp(request):
-#     user_id = request.session.get('user_id')
-#     user = get_object_or_404(CustomUser, id=user_id)
-#     otp_resend_count = request.session.get('otp_resend_count', 0)
+def resend_otp(request):
+    user_id = request.session.get('user_id')
+    user = get_object_or_404(CustomUser, id=user_id)
+    otp_resend_count = request.session.get('otp_resend_count', 0)
 
-#     if otp_resend_count < 3:
-#         send_otp_email(user)
-#         request.session['otp_resend_count'] = otp_resend_count + 1
-#         messages.success(request, "OTP has been resent to your email.")
-#     else:
-#         messages.error(request, "You have reached the maximum OTP resend attempts.")
+    if otp_resend_count < 3:
+        send_otp_email(user)
+        request.session['otp_resend_count'] = otp_resend_count + 1
+        messages.success(request, "OTP has been resent to your email.")
+    else:
+        messages.error(request, "You have reached the maximum OTP resend attempts.")
 
-#     return redirect('verify_otp')
+    return redirect('verify_otp')
 
 
 
@@ -153,6 +184,7 @@ def register(request):
 def home(request):
     products = Products.objects.all()
     categories = Category.objects.all()
+    products = Products.objects.prefetch_related('images').all()
     return render(request, 'accounts/home.html', {'products': products, 'categories': categories})
     profile = Profile.objects.get(user=request.user)
     return render(request, 'home.html', {'profile': profile})

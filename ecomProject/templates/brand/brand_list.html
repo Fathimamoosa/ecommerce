@@ -1,0 +1,60 @@
+{% extends 'custom_admin/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Brand</h2>
+            <p>Brand and vendor management</p>
+        </div>
+        <div>
+            <a href="{% url 'brand_add' %}" class="btn btn-primary"><i class="text-muted material-icons md-post_add"></i>Add New Brand</a>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+                <div class="col-lg-4 mb-lg-0 mb-15 me-auto">
+                    <input type="text" placeholder="Search..." class="form-control">
+                </div>
+                <div class="col-lg-2 col-6">
+                    <div class="custom_select">
+                        <select class="form-select select-nice">
+                            <option selected>Brands</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <input type="date" class="form-control" name="">
+                </div>
+            </div>
+        </header> 
+        
+        <div class="card-body">
+            <div class="row gx-3">
+                {% for brand in brands %}
+                <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                    <figure class="card border-1">
+                        <div class="card-header bg-white text-center">
+                            {% if brand.image %}
+                                <img height="76" src="{{ brand.image.url }}" class="img-fluid" alt="{{ brand.name }} Logo">
+                            {% else %}
+                                <p>No logo available for {{ brand.name }}</p>
+                            {% endif %}
+                        </div>
+                        <figcaption class="card-body text-center">
+                            <h6 class="card-title m-0">{{ brand.name }}</h6>
+                            <a href="#"> {{ brand.products.count }} items </a>
+                        </figcaption>
+                    </figure>
+                </div> 
+                {% empty %}
+                <p>No brands found.</p>
+                {% endfor %}
+            </div>
+        </div> 
+    </div> 
+</section>
+{% endblock %}

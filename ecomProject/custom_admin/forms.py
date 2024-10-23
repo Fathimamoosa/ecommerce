@@ -2,6 +2,8 @@ from django import forms
 from accounts.models import CustomUser
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from category.models import Category
+
+
 class CustomUserChangeForm(forms.ModelForm):
     class Meta:
         model = CustomUser
@@ -30,4 +32,6 @@ class CustomUserForm(UserCreationForm):
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
-        fields = ['category_name', 'slug', 'description', 'cat_image']
+        fields = ['category_name', 'description', 'cat_image']
+
+

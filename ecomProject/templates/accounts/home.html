@@ -37,13 +37,14 @@
 	<link rel="stylesheet" type="text/css" href="{% static 'frontend/asset/css/main.css' %}">
 <!--===============================================================================================-->
 <style>
-	/* Crop the image to a specific size */
+	
 	.wrap-pic-w img {
-		width: 400px;  /* Adjust width */
-		height: 300px; /* Adjust height */
-		object-fit: cover; /* Crops the image to fit the container */
-		overflow: hidden; /* Hides the overflowed image */
+		width: 400px;  
+		height: 300px; 
+		object-fit: cover; 
+		overflow: hidden; 
 	}
+    
 </style>
 <!-- <img src="{{ category.image_thumbnail.url }}" alt="{{ category.name }}" width="300" height="300"> -->
 </head>
@@ -58,7 +59,7 @@
 					
 					<!-- Logo desktop -->		
 					<a href="#" class="logo">
-						<img src="{% static 'frontend/asset/images/icons/1.png' %}" alt="IMG-LOGO">
+						<img src="{% static 'frontend/asset/images/icons/Lustrelux.png' %}" alt="IMG-LOGO">
 					</a>
 
 					<!-- Menu desktop -->
@@ -83,7 +84,13 @@
 							<li>
 								<a href="contact.html">Contact</a>
 							</li>
-
+							{% if user.is_authenticated %}
+							<li><a href="{% url 'accounts_login' %}">Logout</a></li>
+							{% else %}
+							<li><a href="{% url 'accounts_login' %}">Login</a></li>
+							<li><a href="{% url 'accounts_register' %}">Register</a></li>	
+							{% endif %}
+							<li><a href="{% url 'accounts_register' %}">Register</a></li>
 						</ul>
 					</div>	
 
@@ -423,20 +430,18 @@
 	<section class="section-slide">
 		<div class="wrap-slick1 rs2-slick1">
 			<div class="slick1">
-				<div class="item-slick1 bg-overlay1" style="background-image: url();" data-thumb="images/thumb-01.jpg" data-caption="Women’s Wear">
-					<div class="container h-full">
-				
+				<div class="item-slick1 bg-overlay1" style="background-image: url(images/slide-05.jpg);" data-thumb="images/thumb-01.jpg" data-caption="Women’s Wear">
 					<div class="container h-full">
 						<div class="flex-col-c-m h-full p-t-100 p-b-60 respon5">
 							<div class="layer-slick1 animated visible-false" data-appear="fadeInDown" data-delay="0">
 								<span class="ltext-202 txt-center cl0 respon2">
-									Where every natural diamond tells a story
+									Sparkle Forever ✨
 								</span>
 							</div>
 								
 							<div class="layer-slick1 animated visible-false" data-appear="fadeInUp" data-delay="800">
 								<h2 class="ltext-104 txt-center cl0 p-t-22 p-b-40 respon1">
-									Mark your moment
+									Eternal Brilliance
 								</h2>
 							</div>
 								
@@ -449,18 +454,18 @@
 					</div>
 				</div>
 
-				<div class="item-slick1 bg-overlay1" style="background-image: url();" data-thumb="images/thumb-02.jpg" data-caption="Men’s Wear">
+				<div class="item-slick1 bg-overlay1" style="background-image: url(images/slide-06.jpg);" data-thumb="images/thumb-02.jpg" data-caption="Men’s Wear">
 					<div class="container h-full">
 						<div class="flex-col-c-m h-full p-t-100 p-b-60 respon5">
 							<div class="layer-slick1 animated visible-false" data-appear="rollIn" data-delay="0">
 								<span class="ltext-202 txt-center cl0 respon2">
-									Sparkle Forever ✨
+									Where every natural diamond tells a story
 								</span>
 							</div>
 								
 							<div class="layer-slick1 animated visible-false" data-appear="lightSpeedIn" data-delay="800">
 								<h2 class="ltext-104 txt-center cl0 p-t-22 p-b-40 respon1">
-									Eternal Brilliance
+									Mark your moment
 								</h2>
 							</div>
 								
@@ -501,6 +506,7 @@
 			<div class="wrap-slick1-dots p-lr-10"></div>
 		</div>
 	</section>
+
 
 
 	<!-- Banner -->
@@ -789,13 +795,18 @@
 				<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
 					<!-- Block2 -->
 
-					<div class="block2">
-						<div class="block2-pic hov-img0 ">
-							<img src="{{ product.images.url }}" alt="IMG-PRODUCT">
-
-							<a href="{% url 'product_detail' product.id %}" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
-								Quick View
-							</a>
+					
+						<div class="block2">
+							<div class="block2-pic hov-img0">
+								{% for image in product.images.all %}
+									{% if forloop.first %}
+										<img src="{{ image.image.url }}" alt="IMG-PRODUCT">
+									{% endif %}
+								{% endfor %}
+								<a href="{% url 'product_detail' product.id %}" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
+									Quick View
+								</a>
+							</div>
 						</div>
 
 						<div class="block2-txt flex-w flex-t p-t-14">
@@ -816,7 +827,6 @@
 								</a>
 							</div>
 						</div>
-					</div>
 				</div>
 				{% endfor %}
 			</div>

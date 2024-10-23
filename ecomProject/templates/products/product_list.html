@@ -58,11 +58,11 @@
                                 <a class="itemside" href="#">
                                     <div class="left">
                                         <!-- <img src="{{ product.images.url }}" class="img-sm img-thumbnail" alt="Item"> -->
-                                    {% if product_images[product.id] %}
-            <img src="{{ product_images[product.id].image.url }}" alt="Image for {{ product.product_name }} class="img-sm img-thumbnail">
-                            {% else %}
-            <p>No image available</p>
-                            {% endif %}
+                                 
+                            <!-- {% for image in product.images.all %}
+                        <img src="{{ image.image.url }}" alt="Image for {{ product.product_name }}">
+                            {% endfor %} -->
+
                                     </div>
                                     <div class="info">
                                         <h6 class="mb-0">{{ product.product_name }}</h6>

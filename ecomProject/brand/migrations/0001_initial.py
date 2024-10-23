@@ -12,14 +12,13 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Category',
+            name='Brand',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('category_name', models.CharField(max_length=50, unique=True)),
-                ('description', models.TextField(blank=True, max_length=255)),
-                ('cat_image', models.ImageField(upload_to='photos/categories')),
+                ('name', models.CharField(max_length=255, unique=True)),
+                ('description', models.TextField(blank=True, null=True)),
+                ('image', models.ImageField(blank=True, null=True, upload_to='brand_images/')),
                 ('is_deleted', models.BooleanField(default=False)),
-                ('deleted_at', models.DateTimeField(blank=True, null=True)),
             ],
         ),
     ]
