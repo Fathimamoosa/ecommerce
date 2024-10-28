@@ -45,7 +45,7 @@ def brand_create(request):
 def brand_update(request, pk):
     brand = get_object_or_404(Brand.all_objects, pk=pk)
     if request.method == 'POST':
-        form = BrandForm(request.POST, instance=brand)
+        form = BrandForm(request.POST, request.FILES, instance=brand)
         if form.is_valid():
             form.save()
             return redirect('brand_list')

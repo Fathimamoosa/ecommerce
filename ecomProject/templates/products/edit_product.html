@@ -23,7 +23,7 @@
     {% for image in existing_images %}
         <div>
             <img src="{{ image.image.url }}" alt="Image for {{ product.product_name }}" style="width: 100px; height: auto;">
-            <span> <a href="{% url 'products:delete_image' image.pk %}">Delete</a></span>
+            <span> <a href="{% url 'products:delete_image' image.id %}">Delete</a></span>
         </div>
     {% empty %}
         <p>No images uploaded.</p>

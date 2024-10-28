@@ -99,7 +99,7 @@ WSGI_APPLICATION = 'ecomProject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Lustrelux',
+        'NAME': 'lustrelux',
         'USER': 'admin',
         'PASSWORD': 'root',
         'HOST': 'localhost',
@@ -186,6 +186,7 @@ CRISPY_ALLOWED_TEMPLATE_PACK = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 AUTHENTICATION_BACKENDS = [
+    # 'accounts.authentication.EmailOrUsernameBackend', 
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend'
 ]

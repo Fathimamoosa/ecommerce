@@ -34,7 +34,7 @@
         
         <div class="card-body">
             <div class="row gx-3">
-                {% for brand in brands %}
+                <!-- {% for brand in brands %}
                 <div class="col-xl-2 col-lg-3 col-md-4 col-6">
                     <figure class="card border-1">
                         <div class="card-header bg-white text-center">
@@ -48,11 +48,59 @@
                             <h6 class="card-title m-0">{{ brand.name }}</h6>
                             <a href="#"> {{ brand.products.count }} items </a>
                         </figcaption>
+                        <div class="card-footer text-center">
+                            <a href="{% url 'brand_update' brand.id %}" class="btn btn-warning btn-sm">Edit</a>
+                            <a href="{% url 'brand_delete' brand.id %}" class="btn btn-danger btn-sm">Delete</a>
+                            {% if brand.is_deleted %} 
+                                <a href="{% url 'restore_brand' brand.id %}" class="btn btn-success btn-sm">Restore</a>
+                            {% endif %}
+                        </div>
                     </figure>
                 </div> 
                 {% empty %}
                 <p>No brands found.</p>
-                {% endfor %}
+                {% endfor %} -->
+                {% for brand in brands %}
+    <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+        <figure class="card border-1">
+            <div class="card-header bg-white text-center">
+                {% if brand.image %}
+                <img src="{{ brand.image.url }}" alt="{{ brand.name }} Logo" class="img-fluid mb-2">
+                {% else %}
+                    <p>No logo available for {{ brand.name }}</p>
+                {% endif %}
+            </div>
+            <figcaption class="card-body text-center">
+                <h6 class="card-title m-0">{{ brand.name }}</h6>
+                <a href="#">{{ brand.products.count }} items</a>
+            </figcaption>
+            <div class="card-footer text-center">
+                <div class="dropdown">
+                    <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> 
+                        <i class="material-icons md-more_horiz"></i> 
+                    </a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'brand_update' brand.id %}">Edit</a>
+                        {% if brand.is_deleted %}
+                            <form action="{% url 'restore_brand' brand.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-success">Restore</button>
+                            </form>
+                        {% else %}
+                            <form action="{% url 'brand_delete' brand.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item text-danger">Delete</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </figure>
+    </div>
+{% empty %}
+<p>No brands found.</p>
+{% endfor %}
+
             </div>
         </div> 
     </div> 

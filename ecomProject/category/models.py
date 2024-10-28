@@ -3,8 +3,7 @@ from django.utils import timezone
 from category.managers import CategoryManager, AllCategoryManager
 from PIL import Image
 import os
-# Create your models here.
-
+ 
 class Category(models.Model):
     category_name = models.CharField(max_length = 50, unique = True)
     description = models.TextField(max_length = 255, blank = True)

@@ -39,6 +39,10 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
 /*//////////////////////////////////////////////////////////////////
 [ FONT ]*/
 
+[data-delay] {
+  animation-delay: var(--delay);
+}
+
 @font-face {
   font-family: Poppins-Regular;
   src: url('../fonts/Poppins/Poppins-Regular.ttf'); 
@@ -818,7 +822,7 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
   height: 100vh;
   top: 0;
   right: 0;
-  background-color: rgba(0,0,0,0.0);
+  background-color: rgba(167, 225, 119, 0.615);
   visibility: hidden;
   
   -webkit-transition: all 0.4s;
@@ -851,7 +855,7 @@ Input, textarea : 14px/1.6 '', Arial, sans-serif;
 
 .show-sidebar {
   visibility: visible;
-  background-color: rgba(0,0,0,0.6);
+  background-color: rgba(245, 237, 237, 0.6);
 }
 
 .show-sidebar .sidebar {

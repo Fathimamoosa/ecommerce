@@ -1,3 +1,14 @@
+document.addEventListener('DOMContentLoaded', function () {
+    let elements = document.querySelectorAll('.animated');
+
+    elements.forEach(function (el) {
+        let appear = el.getAttribute('data-appear');
+        let delay = el.getAttribute('data-delay') || '0ms';
+
+        el.style.setProperty('--delay', `${delay}ms`);
+        el.classList.add('animate__animated', `animate__${appear}`);
+    });
+});
 
 (function ($) {
     "use strict";
