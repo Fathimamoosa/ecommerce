@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test, login_required
-from .models import Products, ProductImage, Variant, Category
+from .models import Products, ProductImage, Variant, Category, Brand
 from .forms import ProductForm
 import base64
 import json
@@ -9,12 +9,8 @@ from .forms import VariantForm
 from django.views import View
 from django.db import models
 from django.views.generic import ListView
-
-
-
-
-    
-
+from django.db.models import Q
+from django.contrib import messages
 
 def custom_admin_required(user):
     return user.is_staff  
@@ -24,6 +20,7 @@ def custom_admin_required(user):
 
 def add_product(request):
     if request.method == 'POST':
+        print(request.POST)
         form = ProductForm(request.POST)
         if form.is_valid():
             product = form.save()
@@ -43,13 +40,15 @@ def add_product(request):
 
         
             
-            variants_data = request.POST.getlist('variants')
+            # variants_data = request.POST.getlist('variants')
+            variants_data = json.loads(request.POST.get('variantsData'))
+            
+            print(variants_data)
             for variant in variants_data:
                 carat = variant['carat']
                 price = variant['price']
-                stock = variant['stock']
                 
-                Variant.objects.create(product=product, carat=carat, price=price, stock=stock)
+                Variant.objects.create(product=product, carat=carat, price=price)
             
             return redirect('products:product_list')
     else:
@@ -72,7 +71,7 @@ def edit_product(request, pk):
             image_files = request.FILES.getlist('image')  
             
             for image_file in image_files:
-                ProductImage.objects.create(product=product, image=image_file)
+                ProductImage.objects.create(products=product, image=image_file)
 
             return redirect('products:product_list')
     else:
@@ -90,6 +89,7 @@ def soft_delete_product(request, pk):
     product = get_object_or_404(Products, pk=pk)
     product.is_deleted = True
     product.save()
+    messages.success(request, f'The product "{product.product_name}" has been soft deleted successfully.')
     return redirect('products:product_list')
 
 @user_passes_test(custom_admin_required)
@@ -110,12 +110,6 @@ def restore_product(request, pk):
 
 
 @login_required
-def product_detail(request, pk):
-    product = get_object_or_404(Products, pk = pk)
-    images = product.images.all()
-    return render(request, 'products/product-detail.html', {'product':product, 'images': images})
-
-
 def add_variant(request, product_id):
     product = get_object_or_404(Products, id=product_id)
     
@@ -136,33 +130,36 @@ def add_variant(request, product_id):
 
 
 def product_detail(request, pk):
-    product = get_object_or_404(Products, id=pk)
+    variant = get_object_or_404(Variant, id=pk)
+    product = variant.product
     variants = Variant.objects.filter(product=product)
     images = ProductImage.objects.filter(products=product)
+    # if product.stock > 0:
+    #     # Logic to add product to cart or process order
+    #     product.stock -= 1
+    #     product.save()
     related_products = Products.objects.filter(category=product.category).exclude(id=product.id)[:5]  
-    return render(request, 'products/product-detail.html', {
+    context = {
         'product': product,
-        'variants': variants,
+        'variant' : variant,
+        'variants' : variants,
         'images': images,
         'related_products': related_products,  
-    })
-
-
-
-
+    }
+    print(context)
+    return render(request, 'products/product-detail.html', context )
 
 class DeleteImageView(View):
     def get(self, request, image_id):
         image = get_object_or_404(ProductImage, id=image_id)
-        product_id = image.product.id 
-        product = image.product # Assuming `ProductImage` has a foreign key to `Product`
+        product_id = image.products.id 
         image.delete()
         return redirect('edit_product', product_id=product_id)
 
 class ProductImageView(View):
     def get(self, request, product_id):
         product = get_object_or_404(Products, id=product_id)
-        images = product.images.all()  # Get related images
+        images = product.images.all()  
         return render(request, 'product_images.html', {'product': product, 'images': images})
     
 @login_required
@@ -170,29 +167,66 @@ def product_view(request, product_id):
     product = Products.objects.get(id=product_id)
     product_images = product.images.all() 
     categories = Category.all_objects.all()
-    print('hai')
     return render(request, 'products/product.html', {
         'product': product,
         'product_images': product_images,
         'categories': categories
     })
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['categories'] = Category.objects.filter(is_active=True)
-        # Get selected categories from GET parameters
-        selected_categories = [int(id) for id in self.request.GET.getlist('category') if id.isdigit()]
-        context['selected_categories'] = selected_categories
-        return context
+    
+# def search_products_view(request):
+#     query = request.GET.get("search-product")
+#     print("Search Query:", query) 
+#     products = []
 
-    def get_queryset(self):
-        queryset = Product.objects.all()
-        categories = self.request.GET.getlist('category')
-        if categories:
-            queryset = queryset.filter(category_id__in=categories)
-        return queryset
+#     if query:
+#         products = Products.objects.filter(
+#             Q(product_name__icontains=query) | Q(description__icontains=query)
+#         ).order_by("created_date")
+#     context = {
+#         "products" : products,
+#         "query" : query,
+#     }
+#     return render(request, 'products/search_products.html', context )
 
-    def get_absolute_url(self):
-        return f"/category/{self.id}/" 
+
+# def product_list(request):
+#     products = Products.objects.all()
+
+#     # Filters
+#     category_id = request.GET.get('category')
+#     if category_id:
+#         products = products.filter(category_id=category_id)
+
+#     brand_id = request.GET.get('brand')
+#     if brand_id:
+#         products = products.filter(brand_id=brand_id)
+
+#     min_price = request.GET.get('min_price')
+#     max_price = request.GET.get('max_price')
+#     if min_price and max_price:
+#         products = products.filter(price__gte=min_price, price__lte=max_price)
+#     elif min_price:
+#         products = products.filter(price__gte=min_price)
+
+#     sort_order = request.GET.get('sort')
+#     if sort_order == 'az':
+#         products = products.order_by('title')
+#     elif sort_order == 'za':
+#         products = products.order_by('-title')
+#     elif sort_order == 'price_low':
+#         products = products.order_by('price')
+#     elif sort_order == 'price_high':
+#         products = products.order_by('-price')
+
+#     categories = Category.objects.all()
+#     brands = Brand.objects.all()
+
+#     return render(request, 'product_list.html', {
+#         'products': products,
+#         'categories': categories,
+#         'brands': brands,
+#     })
+
 class ProductListView1(ListView):
     model = Products
     template_name = 'product.html'
@@ -200,39 +234,33 @@ class ProductListView1(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-
-        # Get selected categories from GET parameters
         selected_categories = [int(id) for id in self.request.GET.getlist('category') if id.isdigit()]
         context['selected_categories'] = selected_categories
-        print(context)
         return context
 
     def get_queryset(self):
-        queryset = Products.objects.all()
+        queryset = Products.objects.filter(category__is_deleted=False)  
         categories = self.request.GET.getlist('category')
         if categories:
             queryset = queryset.filter(category_id__in=categories)
         return queryset
-    
+
 class ProductListView(ListView):
     model = Variant
     template_name = 'product.html'
-    context_object_name = 'products'
+    context_object_name = 'variants'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-
-        # Get selected categories from GET parameters
+        categories = Category.objects.all()
+        context['categories'] = categories
         selected_categories = [int(id) for id in self.request.GET.getlist('category') if id.isdigit()]
         context['selected_categories'] = selected_categories
-        print(context)
         return context
 
     def get_queryset(self):
-        queryset = Variant.objects.all()
+        queryset = Variant.objects.filter(product__category__is_deleted=False) 
         categories = self.request.GET.getlist('category')
         if categories:
-            queryset = queryset.filter(category_id__in=categories)
+            queryset = queryset.filter(product__category_id__in=categories)
         return queryset

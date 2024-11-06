@@ -10,16 +10,15 @@ from brand.models import Brand
 class Products(models.Model):
     product_name = models.CharField(max_length = 200, unique = True)
     description = models.TextField(max_length = 500, blank = True)
-    # price = models.IntegerField()
-    # stock = models.IntegerField()
+    stock = models.PositiveIntegerField(default=0)
     is_available = models.BooleanField(default = True)
     category = models.ForeignKey(Category, on_delete = models.CASCADE)
     created_date = models.DateTimeField(auto_now = True)
     modified_date = models.DateTimeField(auto_now = True)
     is_deleted = models.BooleanField(default=False) 
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='products')
-    objects = CategoryManager()  # For regular users
-    all_objects = AllCategoryManager()  # For admin
+    objects = CategoryManager()  
+    all_objects = AllCategoryManager()  
 
     def __str__(self):
         return self.product_name
@@ -38,7 +37,7 @@ class Variant(models.Model):
     product = models.ForeignKey(Products, related_name='variants', on_delete=models.CASCADE)
     carat = models.DecimalField(max_digits=5, decimal_places=2, default=None)  
     price = models.DecimalField(max_digits=10, decimal_places=2, default = None)  
-    stock = models.PositiveIntegerField(default=0)
+    
 
     def __str__(self):
-        return f"{self.product.title} - {self.carat} carat"
+        return f"{self.price} - {self.carat} carat"

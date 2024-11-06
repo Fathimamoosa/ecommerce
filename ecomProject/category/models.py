@@ -8,10 +8,10 @@ class Category(models.Model):
     category_name = models.CharField(max_length = 50, unique = True)
     description = models.TextField(max_length = 255, blank = True)
     cat_image = models.ImageField(upload_to='photos/categories')
-    is_deleted = models.BooleanField(default=False)  # Soft delete flag
+    is_deleted = models.BooleanField(default=False)  
     deleted_at = models.DateTimeField(null=True, blank=True)
-    objects = CategoryManager()  # For regular users
-    all_objects = AllCategoryManager()  # For admin
+    objects = CategoryManager()  
+    all_objects = AllCategoryManager()
 
     def delete(self, *args, **kwargs):
         self.is_deleted = True
@@ -20,18 +20,14 @@ class Category(models.Model):
 
 
     def save(self, *args, **kwargs):
-        # First save the image (without cropping)
         super().save(*args, **kwargs)
 
-        # Define the cropping logic
         if self.cat_image:
             img_path = self.cat_image.path
             img = Image.open(img_path)
 
-            # Resize the image to 300x300, maintaining the aspect ratio
             img.thumbnail((300, 300), Image.Resampling.LANCZOS)
 
-            # Save the resized image, overwriting the original
             img.save(img_path)
 
 

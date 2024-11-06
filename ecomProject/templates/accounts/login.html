@@ -44,7 +44,7 @@
                             <div class="card-body">
                                
                                 <h4 class="card-title mb-4 text-center">Login</h4>
-                                <form method="post">
+                                <form method="post" autocomplete="off">
                                     {% csrf_token %}
                                     {{ form.as_p }}
                                     <button type="submit" class="btn btn-primary btn-block">Login</button>

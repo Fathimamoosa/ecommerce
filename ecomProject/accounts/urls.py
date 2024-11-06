@@ -2,7 +2,7 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from .views import *
 from products.views import product_detail
-from .views import CustomPasswordResetView  
+from .views import CustomPasswordResetView, edit_profile,  UserAddressesView, AddAddressView, EditAddressView, DeleteAddressView, SetDefaultAddressView
 from . import views
 from products.views import ProductListView
 
@@ -22,13 +22,20 @@ urlpatterns = [
     path('resend-otp/', resend_otp, name='resend_otp'),
     path('change_password/', auth_views.PasswordChangeView.as_view(template_name='accounts/change_password.html'), name='change_password'),
     path('password_change_done/', auth_views.PasswordChangeDoneView.as_view(template_name='accounts/password_change_done.html'), name='password_change_done'),
-    path('change_password/', auth_views.PasswordChangeView.as_view(
-        template_name='change_password.html',
-        success_url='/'
-    ), name='change_password'),
+    path('change_password/', auth_views.PasswordChangeView.as_view(template_name='change_password.html',success_url='/'), name='change_password'),
     path('about/', views.about, name='about'),
     path('contact/', views.contact, name='contact'),
     path('product/', ProductListView.as_view(template_name='products/product.html'), name='product_list'),
+    path('profile/', views.UserProfileView.as_view(), name='profile'),
+    path('edit_profile/', views.edit_profile, name='edit_profile'),
+    path('user_addresses/', views.UserAddressesView.as_view(), name='user_addresses'),
+    path('add_address/', views.AddAddressView.as_view(), name='add_address'),
+    path('edit_address/<int:pk>/', views.EditAddressView.as_view(), name='edit_address'),
+    path('delete_address/<int:pk>/', views.DeleteAddressView.as_view(), name='delete_address'),
+    path('set_default_address/', views.SetDefaultAddressView.as_view(), name='set_default_address'),
 ]
+
+ 
+
 
 

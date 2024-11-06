@@ -7,8 +7,8 @@ class Brand(models.Model):
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='brand_images/', blank=True, null=True) 
     is_deleted = models.BooleanField(default=False)  
-    objects = CategoryManager()  # For regular users
-    all_objects = AllCategoryManager()  # For admin   
+    objects = CategoryManager() 
+    all_objects = AllCategoryManager()    
 
 
     def __str__(self):

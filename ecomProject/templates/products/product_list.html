@@ -43,11 +43,10 @@
                             </select>
                         </div>
                     </div>
-                </header> <!-- card-header end// -->
+                </header> 
                 <div class="card-body">
                     <article class="itemlist">
                         {% for product in products %}
-
                         <div class="row align-items-center">
                             <div class="col col-check flex-grow-0">
                                 <div class="form-check">
@@ -58,11 +57,9 @@
                                 <a class="itemside" href="#">
                                     <div class="left">
                                         <!-- <img src="{{ product.images.url }}" class="img-sm img-thumbnail" alt="Item"> -->
-                                 
-                            <!-- {% for image in product.images.all %}
-                        <img src="{{ image.image.url }}" alt="Image for {{ product.product_name }}">
-                            {% endfor %} -->
-
+                                        <!-- {% for image in product.images.all %} -->
+                                        <!-- <img src="{{ image.image.url }}" alt="Image for {{ product.product_name }}"> -->
+                                        <!-- {% endfor %} -->
                                     </div>
                                     <div class="info">
                                         <h6 class="mb-0">{{ product.product_name }}</h6>
@@ -80,25 +77,31 @@
                                 <a href="{% url 'products:edit_product' product.id %}" class="btn btn-sm font-sm rounded btn-brand">
                                     <i class="material-icons md-edit"></i> Edit
                                 </a>
-
-
-
+                    
                                 {% if product.is_deleted %}
-    <form action="{% url 'products:product_restore' product.pk %}" method="post" style="display:inline;">
-        {% csrf_token %}
-        <i class="material-icons md-delete_forever"></i><button type="submit">Restore</button>
-    </form>
-{% else %}
-    <form action="{% url 'products:soft_delete_product' product.pk %}" method="post" style="display:inline;">
-        {% csrf_token %}
-        <i class="material-icons md-delete_forever"></i><button type="submit">Delete</button>
-    </form>
-{% endif %}
-
+                                <form action="{% url 'products:product_restore' product.pk %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <i class="material-icons md-delete_forever"></i>
+                                    <button type="submit">Restore</button>
+                                </form>
+                                {% else %}
+                                <form action="{% url 'products:soft_delete_product' product.pk %}" method="post" style="display:inline;" onsubmit="return confirmDelete();">
+                                    {% csrf_token %}
+                                    <i class="material-icons md-delete_forever"></i>
+                                    <button type="submit">Delete</button>
+                                </form>
+                                {% endif %}
                             </div>
                         </div> <!-- row .// -->
                         {% endfor %}
-                    </article> <!-- itemlist  .// -->
+                    </article>
+                    
+                    <script>
+                        function confirmDelete() {
+                            return confirm('Are you sure you want to soft delete this product?');
+                        }
+                    </script>
+                    
                 </div> <!-- card-body end// -->
             </div> <!-- card end// -->
             <div class="pagination-area mt-30 mb-50">

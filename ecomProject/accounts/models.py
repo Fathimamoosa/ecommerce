@@ -6,6 +6,7 @@ import random
 from datetime import timedelta
 from django.contrib.auth.models import User
 from django.conf import settings
+from django import forms
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -41,28 +42,29 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-    
-    
-# class OTP(models.Model):
-#     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-#     otp_code = models.CharField(max_length=6)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     is_verified = models.BooleanField(default=False)
-
-#     def save(self, *args, **kwargs):
-#         # Generate a random 6-digit OTP
-#         if not self.otp_code:
-#             self.otp_code = str(random.randint(100000, 999999))
-#         super().save(*args, **kwargs)
-
-#     def is_expired(self):
-#         return self.created_at + timedelta(minutes=5) < timezone.now()  # OTP expires after 5 minutes
    
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
 
     def __str__(self):
         return self.user.username
+    
+class Address(models.Model):
+    
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255, blank=False)
+    address_line1 = models.CharField(max_length=255, blank=False)
+    address_line2 = models.CharField(max_length=255, blank=True) 
+    town = models.CharField(max_length=100, blank=False)
+    city = models.CharField(max_length=100, blank=False)
+    state = models.CharField(max_length=100, blank=False)
+    pincode = models.IntegerField( blank=False)  
+    contact_number = models.IntegerField( blank=False) 
+    is_default = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.name}, {self.city}, {self.state}"
+    
+

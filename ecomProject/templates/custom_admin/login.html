@@ -33,7 +33,7 @@
                     <h4 class="card-title mb-4">Sign in</h4>
 
 
-                    <form method="post">
+                    <form method="post" autocomplete="off">
                         {% csrf_token %}
                         {{ form.as_p }}
                         <button type="submit" class="btn btn-primary w-100">Login</button>

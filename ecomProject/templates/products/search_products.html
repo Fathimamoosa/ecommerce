@@ -1,3 +1,65 @@
+<!-- <form action="{% url 'products:search_products' %}" method="get">
+    <!-- Keyword Search -->
+    <!-- <div>
+        <input type="text" name="keyword" placeholder="Search..." value="{{ keyword }}">
+        <button type="submit">Search</button>
+    </div>
+
+    <!-- Category Filter -->
+    <!-- <div>
+        <h4>Categories</h4>
+        {% for category in categories %}
+            <label>
+                <input type="checkbox" name="category" value="{{ category.id }}" 
+                       {% if category.id|stringformat:"s" in selected_categories %}checked{% endif %}>
+                {{ category.name }}
+            </label>
+        {% endfor %}
+    </div> -->
+
+    <!-- Brand Filter -->
+    <!-- <div>
+        <h4>Brands</h4>
+        {% for brand in brands %}
+            <label>
+                <input type="checkbox" name="brand" value="{{ brand.id }}" 
+                       {% if brand.id|stringformat:"s" in selected_brands %}checked{% endif %}>
+                {{ brand.name }}
+            </label>
+        {% endfor %}
+    </div> -->
+
+    <!-- Sort By -->
+    <!-- <div>
+        <select name="sort_by">
+            <option value="">Sort By</option>
+            <option value="price_low_high" {% if sort_by == 'price_low_high' %}selected{% endif %}>Price: Low to High</option>
+            <option value="price_high_low" {% if sort_by == 'price_high_low' %}selected{% endif %}>Price: High to Low</option>
+            <option value="az" {% if sort_by == 'az' %}selected{% endif %}>A to Z</option>
+            <option value="za" {% if sort_by == 'za' %}selected{% endif %}>Z to A</option>
+        </select>
+        <button type="submit">Apply Filters</button>
+    </div>
+</form> -->
+
+<!-- Display Products -->
+<!-- <div>
+    {% if products %}
+        <h2>{{ count }} Products Found</h2>
+        <div class="product-list">
+            {% for product in products %}
+                <div class="product-card">
+                    <h3>{{ product.product_name.name }}</h3>
+                    <p>Category: {{ product.product_name.category.name }}</p>
+                    <p>Brand: {{ product.product_name.brand.name }}</p>
+                    <p>Price: {{ product.price }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No products found.</p>
+    {% endif %}
+</div> -->
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -36,263 +98,7 @@
 		<link rel="stylesheet" type="text/css" href="{% static 'frontend/asset/css/main.css' %}">
 	<!--===============================================================================================-->
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-	<style>
-		.page-border-container {
-    border: 2px solid #e0e0e0; /* Light grey border */
-    padding: 20px; /* Space between border and content */
-    margin: 20px auto; /* Center the container with some top and bottom margin */
-    max-width: 1200px; /* Limit width for a centered look */
-    border-radius: 8px; /* Rounded corners for the border */
-    background-color: #ffffff; /* White background for the content area */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow around the border */
-}
-/* Set the height of the product image container */
-.block2-pic {
-    height: 250px; /* Adjust as needed */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
-.block2-pic img {
-    max-height: 100%; /* Ensure images fit within the container */
-    width: auto; /* Maintain aspect ratio */
-}
-
-.product-details {
-    height: 120px; /* Adjust to fit your content */
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-}
-
-.product-details .block2-txt-child1 {
-    flex: 1;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    text-align: center;
-}
-
-.stext-104 {
-    font-size: 16px;
-    line-height: 1.2;
-    height: 40px; /* Set height for text consistency */
-    overflow: hidden; /* Truncate text if too long */
-}
-
-.stext-105 {
-    font-size: 14px;
-    color: #333;
-}
-
-/* Consistent button placement */
-.block2-btn {
-    position: absolute;
-    bottom: 10px;
-    width: 80%;
-    text-align: center;
-}
-.products-section {
-    font-family: Arial, sans-serif;
-    padding: 20px;
-}
-
-.layout-container {
-    display: flex;
-}
-
-.filter-sidebar {
-    flex: 1;
-    max-width: 250px;
-    padding: 20px;
-    background-color: #f8f8f8;
-    border-radius: 8px;
-    margin-right: 20px;
-}
-
-.filter-sidebar h3 {
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.categories, .price-filters, .rating-filters {
-    margin-bottom: 20px;
-}
-
-.rating-filters .stars {
-    color: #f4b400; /* Gold color for stars */
-}
-.product-grid {
-            padding: 2rem 0;
-        }
-
-		.product-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: relative;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            height: 100%;
-            overflow: hidden;
-        }
-
-		.product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-        }
-
-.product-image {
-    position: relative;
-	padding-top: 100%; 
-	overflow: hidden;
-}
-
-.product-image img {
-    position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-}
-
-.quick-view-btn {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #ff6b6b;
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 4px;
-    text-decoration: none;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.product-card:hover .quick-view-btn {
-    bottom: 0; 
-}
-
-.product-details {
-    padding: 10px 0;
-}
-
-.product-name {
-    font-size: 16px;
-    font-weight: bold;
-    color: #333;
-    display: block;
-    margin-bottom: 5px;
-    text-decoration: none;
-}
-
-.product-price {
-	display: block;
-            color: #221f1f;
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-}
-
-.view-details-btn {
-            display: inline-block;
-            padding: 0.5rem 1.5rem;
-            background: #333;
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            transition: background 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-        .view-details-btn:hover {
-            background: #000;
-        }
-
-        .wishlist-icon {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: white;
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .wishlist-icon:hover {
-            transform: scale(1.1);
-        }
-
-        .wishlist-icon img {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Responsive Grid */
-        .row {
-            margin-right: -15px;
-            margin-left: -15px;
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        [class*="col-"] {
-            padding: 15px;
-        }
-
-        @media (max-width: 576px) {
-            .col-sm-6 {
-                flex: 0 0 50%;
-                max-width: 50%;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .col-md-4 {
-                flex: 0 0 33.333333%;
-                max-width: 33.333333%;
-            }
-        }
-
-        @media (max-width: 992px) {
-            .col-lg-3 {
-                flex: 0 0 25%;
-                max-width: 25%;
-            }
-        }
-.product-card:hover .product-image img {
-            transform: scale(1.05);
-        }
-.isotope-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-    width: 100%;
-}
-
-.isotope-item {
-    display: flex;
-    flex-direction: column;
-    background: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-.block2-txt {
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-</style>
 	</head>
 <body class="animsition">
 	
@@ -615,97 +421,112 @@
 				</div>
 				
 				<!-- Search product -->
-				
+				<!-- <div class="dis-none panel-search w-full p-t-10 p-b-15">
+					<div class="bor8 dis-flex p-l-15">
+						<button class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
+							<i class="zmdi zmdi-search"></i>
+						</button>
+
+						<input class="mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="search-product" placeholder="Search">
+					</div>	
+				</div> -->
+				<!-- <form method="get" action="{% url 'products:search_products' %}">
+					<div class="dis-none panel-search w-full p-t-10 p-b-15">
+						<div class="bor8 dis-flex p-l-15">
+							<button type="submit" class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
+								<i class="zmdi zmdi-search"></i>
+							</button>
+							<input class="mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="search-product" placeholder="Search" value="{{ keyword }}">
+						</div>    
+					</div>
+				</form> -->
+				<div class="dis-none panel-search w-full p-t-10 p-b-15">
+					<div class="bor8 dis-flex p-l-15">
+						<button type="submit" class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
+							<i class="zmdi zmdi-search"></i>
+						</button>
+						<form action="{% url 'products:search_products' %}" method="GET"> 
+							<input class="mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="search-product" placeholder="Search">
+						</form>
+					</div>    
+				</div>
+
 				<!-- Filter -->
 				<div class="dis-none panel-filter w-full p-t-10">
 					<div class="wrap-filter flex-w bg6 w-full p-lr-40 p-t-27 p-lr-15-sm">
-						<div class="filter-col1 p-r-15 p-b-27">
-							<div class="mtext-102 cl2 p-b-15">
-								Sort By
-							</div>
+						<!-- <div class="filter-col1 p-r-15 p-b-27">
+                            <div class="mtext-102 cl2 p-b-15">Sort By</div>
+                            <ul>
+                                <li class="p-b-6">
+                                    <a href="?sort=default" class="filter-link stext-106 trans-04 {% if request.GET.sort == 'default' %}filter-link-active{% endif %}">
+                                        Default
+                                    </a>
+                                </li>
+                                <li class="p-b-6">
+                                    <a href="?sort=az" class="filter-link stext-106 trans-04 {% if request.GET.sort == 'az' %}filter-link-active{% endif %}">
+                                        A-Z
+                                    </a>
+                                </li>
+                                <li class="p-b-6">
+                                    <a href="?sort=za" class="filter-link stext-106 trans-04 {% if request.GET.sort == 'za' %}filter-link-active{% endif %}">
+                                        Z-A
+                                    </a>
+                                </li>
+                                <li class="p-b-6">
+                                    <a href="?sort=price_low" class="filter-link stext-106 trans-04 {% if request.GET.sort == 'price_low' %}filter-link-active{% endif %}">
+                                        Price: Low to High
+                                    </a>
+                                </li>
+                                <li class="p-b-6">
+                                    <a href="?sort=price_high" class="filter-link stext-106 trans-04 {% if request.GET.sort == 'price_high' %}filter-link-active{% endif %}">
+                                        Price: High to Low
+                                    </a>
+                                </li>
+                                <li class="p-b-6">
+                                    <a href="?sort=brand" class="filter-link stext-106 trans-04 {% if request.GET.sort == 'brand' %}filter-link-active{% endif %}">
+                                        Brand
+                                    </a>
+                                </li>
+                                <li class="p-b-6">
+                                    <a href="?sort=category" class="filter-link stext-106 trans-04 {% if request.GET.sort == 'category' %}filter-link-active{% endif %}">
+                                        Category
+                                    </a>
+                                </li>
+                            </ul>
+                        </div> -->
+                        
 
-							<ul>
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										Default
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										Popularity
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										Average rating
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
-										Newness
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										Price: Low to High
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										Price: High to Low
-									</a>
-								</li>
-							</ul>
-						</div>
-
-						<div class="filter-col2 p-r-15 p-b-27">
-							<div class="mtext-102 cl2 p-b-15">
-								Price
-							</div>
-
-							<ul>
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
-										All
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$0.00 - $50.00
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$50.00 - $100.00
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$100.00 - $150.00
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$150.00 - $200.00
-									</a>
-								</li>
-
-								<li class="p-b-6">
-									<a href="#" class="filter-link stext-106 trans-04">
-										$200.00+
-									</a>
-								</li>
-							</ul>
-						</div>
+						<!-- <div class="filter-col2 p-r-15 p-b-27">
+                            <div class="mtext-102 cl2 p-b-15">Price</div>
+                            <ul>
+                                <li class="p-b-6">
+                                    <a href="?min_price=0&max_price=50" class="filter-link stext-106 trans-04 {% if request.GET.min_price == '0' and request.GET.max_price == '50' %}filter-link-active{% endif %}">
+                                        $0.00 - $50.00
+                                    </a>
+                                </li>
+                                <li class="p-b-6">
+                                    <a href="?min_price=50&max_price=100" class="filter-link stext-106 trans-04 {% if request.GET.min_price == '50' and request.GET.max_price == '100' %}filter-link-active{% endif %}">
+                                        $50.00 - $100.00
+                                    </a>
+                                </li>
+                                <li class="p-b-6">
+                                    <a href="?min_price=100&max_price=150" class="filter-link stext-106 trans-04 {% if request.GET.min_price == '100' and request.GET.max_price == '150' %}filter-link-active{% endif %}">
+                                        $100.00 - $150.00
+                                    </a>
+                                </li>
+                                <li class="p-b-6">
+                                    <a href="?min_price=150&max_price=200" class="filter-link stext-106 trans-04 {% if request.GET.min_price == '150' and request.GET.max_price == '200' %}filter-link-active{% endif %}">
+                                        $150.00 - $200.00
+                                    </a>
+                                </li>
+                                <li class="p-b-6">
+                                    <a href="?min_price=200" class="filter-link stext-106 trans-04 {% if request.GET.min_price == '200' %}filter-link-active{% endif %}">
+                                        $200.00+
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                         -->
 
 						<div class="filter-col3 p-r-15 p-b-27">
 							<div class="mtext-102 cl2 p-b-15">
@@ -805,69 +626,56 @@
 					</div>
 				</div>
 			</div>
-<h2>Products</h2>
+            <h2>Products</h2>
 			
-	<div class="layout-container">
-				<!-- Filter Sidebar
-				<aside class="filter-sidebar">
-					<h3>Filter by Categories</h3>
-					<div class="categories">
-						<label><input type="checkbox" name="category" value="all" /> All Categories</label>
-						{% for category in categories %}
-							<label>
-								<input type="checkbox" name="category" value="{{ category.category_name }}" />
-								{{ category.category_name }}
-							</label>
-						{% empty %}
-							<p>No categories available</p>  
-						{% endfor %}
-					</div>
-					<h3>Filter by Price</h3>
-					<div class="price-filters">
-						<label><input type="checkbox" name="price" value="all" /> All Prices</label>
-						<label><input type="checkbox" name="price" value="1-2" /> Rs. 1 lac to Rs. 2 lac</label>
-						<label><input type="checkbox" name="price" value="2-3" /> Rs. 2 lac to Rs. 3 lac</label>
-						<label><input type="checkbox" name="price" value="above-2" /> Above Rs. 2 lac</label>
-					</div>
-				</aside> -->
-		
+	    <div class="layout-container">
+		    <!-- <div class="row isotope-grid">
+                
+                {% if products %}
+                {% for product in products %}
+                <p>{{ product.product_name }}</p>
+                <p>{{ product.description }}</p>
+                {% endfor %}
+                {% else %}
+                <p>No products found.</p>
+                {% endif %}
+		    </div> -->
+            <div class="row isotope-grid">
+				{% for product in products %}
 				
-			<div class="row isotope-grid">
-				{% for variant in variants %}
-				<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item watches">
+				<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
 					<!-- Block2 -->
 					<div class="block2">
-						
 						<div class="block2-pic hov-img0">
-							{% if variant.product.images.all %}
-							<img src="{{ variant.product.images.all.0.image.url }}" alt="{{ product.product_name }}">
-									{% else %}
-										<img src="{% static 'frontend/asset/images/default_image.jpg' %}" alt="Default Image">
-									{% endif %}
-									<a href="{% url 'product_detail' variant.id %}" class="quick-view-btn">Quick View</a>
+							{% for image in product.images.all %}
+								{% if forloop.first %}
+									<img src="{{ image.image.url }}" alt="IMG-PRODUCT">
+								{% endif %}
+							{% endfor %}
+							<a href="{% url 'product_detail' product.id %}" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
+								Quick View
+							</a>
 						</div>
 
 						<div class="block2-txt flex-w flex-t p-t-14">
 							<div class="block2-txt-child1 flex-col-l ">
-								<a href="{% url 'product_detail' variant.id %}" class="product-name">
-									{{ variant.product.product_name }}
+								<a href="{% url 'product_detail' product.id %}" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+									{{product.product_name}}
 								</a>
-								<span class="product-price">Rs{{ variant.price }}</span>
-								<a href="{% url 'product_detail' variant.id %}" class="view-details-btn">View Details</a>
 							</div>
+
 							<div class="block2-txt-child2 flex-r p-t-3">
-								<a href="#" class="add-to-wishlist">
-									<img src="{% static 'frontend/asset/images/icons/icon-heart-01.png' %}" alt="Wishlist Icon">
+								<a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
+									<img class="icon-heart1 dis-block trans-04" src="{% static 'frontend/asset/images/icons/icon-heart-01.png' %}" alt="ICON">
+									<img class="icon-heart2 dis-block trans-04 ab-t-l" src="{% static 'frontend/asset/images/icons/icon-heart-02.png' %}" alt="ICON">
 								</a>
-								
 							</div>
 						</div>
-						
 					</div>
 				</div>
-				{% endfor %}
-			</div>
-		</div>
+				{% endfor %} 
+			</div> 
+        </div>
 </section>
 
 		

@@ -16,4 +16,4 @@ class ProductImageForm(forms.ModelForm):
 class VariantForm(forms.ModelForm):
     class Meta:
         model = Variant
-        fields = ['carat', 'price', 'stock']
+        fields = ['carat', 'price']

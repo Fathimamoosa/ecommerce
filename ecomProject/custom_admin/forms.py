@@ -12,10 +12,10 @@ class CustomUserChangeForm(forms.ModelForm):
 
 class CustomLoginForm(AuthenticationForm):
     username = forms.EmailField(label='Email', max_length=254,
-    widget=forms.TextInput(attrs={'class': 'form-control custom-class-username', 'placeholder': 'Email'}))
+    widget=forms.TextInput(attrs={'class': 'form-control custom-class-username', 'placeholder': 'Email', 'autocomplete' : 'off' }))
 
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control custom-class-password', 'placeholder': 'Password'})
+        widget=forms.PasswordInput(attrs={'class': 'form-control custom-class-password', 'placeholder': 'Password', 'autocomplete': 'off'})
     )                         
 
 

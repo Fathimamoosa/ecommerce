@@ -146,6 +146,8 @@ def category_update(request, pk):
 def category_delete(request, pk):
     category = get_object_or_404(Category, pk=pk)
     if request.method == 'POST':
+        category.is_deleted = False
+        category.save()
         category.delete()
         return redirect('category_list')
     return render(request, 'category/category_confirm_delete.html', {'category': category})
