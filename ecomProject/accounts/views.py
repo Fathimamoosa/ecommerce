@@ -17,6 +17,7 @@ from django.utils.crypto import get_random_string
 from django.views.generic import UpdateView, DetailView, ListView, CreateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
+from django.contrib.auth import logout
 
 
 class CustomPasswordResetView(PasswordResetView):
@@ -33,30 +34,30 @@ backend = 'custom_admin.auth_backends.EmailBackend'
 
 
 
-def custom_login(request):
-    if request.method == 'POST':
-        form = CustomAuthenticationForm(request.POST)
-        if form.is_valid():
-            username= form.cleaned_data.get('email')  
-            password = form.cleaned_data.get('password')
+# def custom_login(request):
+#     if request.method == 'POST':
+#         form = CustomAuthenticationForm(request.POST)
+#         if form.is_valid():
+#             username= form.cleaned_data.get('email')  
+#             password = form.cleaned_data.get('password')
 
-            user = authenticate(request, username=username, password=password)
+#             user = authenticate(request, username=username, password=password)
 
-            if user is not None:
-                if user.is_blocked:
-                    messages.error(request, 'Your account is blocked.')
-                else:
-                    # login(request, user)
-                    # messages.success(request, f'Welcome, {user.email if user.email else user.username}!')
-                    return redirect('home')
-            else:
-                messages.error(request, 'Invalid username or email and password combination.')
-        else:
-            messages.error(request, 'Form validation failed.')
-    else:
-        form = CustomAuthenticationForm()
+#             if user is not None:
+#                 if user.is_blocked:
+#                     messages.error(request, 'Your account is blocked.')
+#                 else:
+#                     # login(request, user)
+#                     # messages.success(request, f'Welcome, {user.email if user.email else user.username}!')
+#                     return redirect('home')
+#             else:
+#                 messages.error(request, 'Invalid username or email and password combination.')
+#         else:
+#             messages.error(request, 'Form validation failed.')
+#     else:
+#         form = CustomAuthenticationForm()
 
-    return render(request, 'accounts/login.html', {'form': form})
+#     return render(request, 'accounts/login.html', {'form': form})
 
 
 class LogoutView(View):
@@ -232,19 +233,19 @@ class DeleteAddressView(LoginRequiredMixin, DeleteView):
         messages.success(request, "Address deleted successfully.")
         return super().delete(request, *args, **kwargs)
 
-class SetDefaultAddressView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-        address_id = request.POST.get("address_id")
-        user = request.user
+# class SetDefaultAddressView(LoginRequiredMixin, View):
+#     def post(self, request, *args, **kwargs):
+#         address_id = request.POST.get("address_id")
+#         user = request.user
 
-        Address.objects.filter(user=user, is_default=True).update(is_default=False)
-        Address.objects.filter(id=address_id, user=user).update(is_default=True)
-        Address.is_default = True
-        Address.save()
+#         Address.objects.filter(user=user, is_default=True).update(is_default=False)
+#         Address.objects.filter(id=address_id, user=user).update(is_default=True)
+#         Address.is_default = True
+#         Address.save()
         
 
-        return JsonResponse({"success": True})
-    
+#         return JsonResponse({"success": True})
+
 
 def edit_profile(request):
     user = request.user  
@@ -256,3 +257,51 @@ def edit_profile(request):
         form = ProfileForm(instance=user)  
 
     return render(request, 'accounts/edit_profile.html', {'form': form})
+
+
+def custom_login(request):
+    if request.method == 'POST':
+        form = CustomAuthenticationForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('email')  
+            password = form.cleaned_data.get('password')
+
+            # Authenticate the user
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                # Check if the user is a superuser or staff member
+                if user.is_superuser or user.is_staff:
+                    messages.error(request, 'Admin accounts cannot log in from the user side.')
+                elif user.is_blocked:
+                    messages.error(request, 'Your account is blocked.')
+                else:
+                    login(request, user)  # Log the user in
+                    messages.success(request, f'Welcome, {user.email if user.email else user.username}!')
+                    return redirect('home')  # Redirect to the desired page after login
+            else:
+                messages.error(request, 'Invalid username or email and password combination.')
+        else:
+            messages.error(request, 'Form validation failed.')
+    else:
+        form = CustomAuthenticationForm()
+
+    return render(request, 'accounts/login.html', {'form': form})
+
+@login_required
+def set_default_address(request, address_id):
+    # Ensure only the addresses of the logged-in user can be updated
+    address = get_object_or_404(Address, id=address_id, user=request.user)
+
+    # Unset the current default address if it exists
+    Address.objects.filter(user=request.user, is_default=True).update(is_default=False)
+
+    # Set the selected address as the default
+    address.is_default = True
+    address.save()
+
+    if request.is_ajax():
+        # Respond with a JSON response indicating success
+        return JsonResponse({'success': True, 'address_id': address.id})
+
+    return JsonResponse({'success': False}, status=400)# Replace 'address_list' with your desired redirect URL

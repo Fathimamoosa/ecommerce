@@ -11,6 +11,10 @@ from django.db import models
 from django.views.generic import ListView
 from django.db.models import Q
 from django.contrib import messages
+from django.urls import reverse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from cart.views import _cart_id
+from cart.models import CartItem
 
 def custom_admin_required(user):
     return user.is_staff  
@@ -47,8 +51,10 @@ def add_product(request):
             for variant in variants_data:
                 carat = variant['carat']
                 price = variant['price']
+                stock = variant['stock']
+
                 
-                Variant.objects.create(product=product, carat=carat, price=price)
+                Variant.objects.create(product=product, carat=carat, price=price, stock=stock)
             
             return redirect('products:product_list')
     else:
@@ -63,6 +69,8 @@ def add_product(request):
 def edit_product(request, pk):
     product = get_object_or_404(Products.all_objects, pk=pk)
     existing_images = product.images.all() 
+    existing_variants = Variant.objects.all()
+
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
         
@@ -73,13 +81,38 @@ def edit_product(request, pk):
             for image_file in image_files:
                 ProductImage.objects.create(products=product, image=image_file)
 
+            variants_data = request.POST.get('variantsData')
+            if variants_data:
+                variants = json.loads(variants_data)
+                existing_variant_ids = [variant.id for variant in existing_variants]
+
+                for variant_data in variants:
+                    variant_id = variant_data.get('id')
+                    carat = variant_data['carat']
+                    price = variant_data['price']
+                    stock = variant_data['stock']
+
+                    if variant_id:  # Update existing variant
+                        variant = Variant.objects.get(id=variant_id)
+                        variant.carat = carat
+                        variant.price = price
+                        variant.stock = stock
+                        variant.save()
+                        existing_variant_ids.remove(variant.id)
+                    else:  # Add new variant
+                        Variant.objects.create(product=product, carat=carat, price=price, stock=stock)
+
+                # Delete variants not in the submitted data
+                Variant.objects.filter(id__in=existing_variant_ids).delete()
+
             return redirect('products:product_list')
     else:
         form = ProductForm(instance=product)
-    
+
     return render(request, 'products/edit_product.html', {
         'form': form,
         'existing_images': existing_images,
+        'existing_variants': existing_variants,
     })
 
 
@@ -96,7 +129,16 @@ def soft_delete_product(request, pk):
 def product_list(request):
     products = Products.all_objects.all()
     product_images = {product.id: product.images.first() for product in products}
-    return render(request, 'products/product_list.html', {'products': products, 'product_images': product_images})
+    paginator = Paginator(products, 4)
+    page_number = request.GET.get('page')
+    page_obj = Paginator.get_page(paginator, page_number)
+
+    context = {
+        'products': products,
+        'product_images': product_images,
+        'page_obj' : page_obj
+    }
+    return render(request, 'products/product_list.html', context)
 
 
 @user_passes_test(custom_admin_required)
@@ -134,10 +176,15 @@ def product_detail(request, pk):
     product = variant.product
     variants = Variant.objects.filter(product=product)
     images = ProductImage.objects.filter(products=product)
-    # if product.stock > 0:
-    #     # Logic to add product to cart or process order
-    #     product.stock -= 1
-    #     product.save()
+    in_cart = CartItem.objects.filter(cart__cart_id= _cart_id(request), variant= variant).exists()
+    
+    if variant.stock > 0:
+        # Logic to add product to cart or process order
+        variant.stock -= 1
+        variant.save()
+        print(variant.stock)
+        
+
     related_products = Products.objects.filter(category=product.category).exclude(id=product.id)[:5]  
     context = {
         'product': product,
@@ -145,6 +192,7 @@ def product_detail(request, pk):
         'variants' : variants,
         'images': images,
         'related_products': related_products,  
+        'in_cart' : in_cart,
     }
     print(context)
     return render(request, 'products/product-detail.html', context )
@@ -154,6 +202,8 @@ class DeleteImageView(View):
         image = get_object_or_404(ProductImage, id=image_id)
         product_id = image.products.id 
         image.delete()
+        return redirect(reverse('products:edit_product', kwargs={'pk': product_id}))
+    
         return redirect('edit_product', product_id=product_id)
 
 class ProductImageView(View):

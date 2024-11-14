@@ -46,7 +46,7 @@
                 </header> 
                 <div class="card-body">
                     <article class="itemlist">
-                        {% for product in products %}
+                        {% for product in page_obj %}
                         <div class="row align-items-center">
                             <div class="col col-check flex-grow-0">
                                 <div class="form-check">
@@ -66,7 +66,7 @@
                                     </div>
                                 </a>
                             </div>
-                            <div class="col-lg-2 col-sm-2 col-4 col-price"> <span>Rs. {{ product.price }}</span> </div>
+                            <div class="col-lg-2 col-sm-2 col-4 col-price"> <span>Rs. {{ variant.price }}</span> </div>
                             <div class="col-lg-2 col-sm-2 col-4 col-status">
                                 <span class="badge rounded-pill alert-success">{{ product.is_available }}</span>
                             </div>
@@ -74,7 +74,7 @@
                                 <span>{{ product.created_date }}</span>
                             </div>
                             <div class="col-lg-2 col-sm-2 col-4 col-action text-end">
-                                <a href="{% url 'products:edit_product' product.id %}" class="btn btn-sm font-sm rounded btn-brand">
+                                <a href="{% url 'products:edit_product' pk=product.id %}" class="btn btn-sm font-sm rounded btn-brand">
                                     <i class="material-icons md-edit"></i> Edit
                                 </a>
                     
@@ -104,7 +104,7 @@
                     
                 </div> <!-- card-body end// -->
             </div> <!-- card end// -->
-            <div class="pagination-area mt-30 mb-50">
+            <!-- <div class="pagination-area mt-30 mb-50">
                 <nav aria-label="Page navigation example">
                     <ul class="pagination justify-content-start">
                         <li class="page-item active"><a class="page-link" href="#">01</a></li>
@@ -115,6 +115,20 @@
                         <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
                     </ul>
                 </nav>
-            </div>
-        </section> <!-- content-main end// -->
+            </div> -->
+            <div class=""> showing page {{ page_obj.number}} of {{ page_obj.paginator.num_pages }}</div>
+            
+                    <ul class="pagination align-right float-right mr-auto">
+                        {% if page_obj.has_previous %}
+                        <li {% if page_obj.number == 1 %} class="page-item active" {% endif %}><a class="page-link" href="?page=1">&laquo; 1</a></li>
+                        <li class="page-item"> <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                        {% endif %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item"> <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                        <li class="page-item"> <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages}} &raquo;</a></li>
+                        {% endif %}
+
+                    </ul>
+        </section> 
 {% endblock %}

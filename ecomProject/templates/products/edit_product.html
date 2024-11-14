@@ -28,6 +28,63 @@
     {% empty %}
         <p>No images uploaded.</p>
     {% endfor %}
+    <h5 class="mt-4">Product Variants</h5>
+    <div id="variantsContainer">
+        <!-- Placeholder for dynamically added variants -->
+     </div>
+    <button type="button" class="btn btn-info mt-2" onclick="addVariant()">Add Variant</button> 
+    
+    <script>
+        let variantIndex = 0;
+        const variants = [];
+        
+        function addVariant() {
+            const container = document.getElementById('variantsContainer');
+            const variantHTML = `
+                <div class="variant-item mb-2" id="variant_${variantIndex}">
+                    <h6>Variant ${variantIndex + 1}</h6>
+                    
+                    <label for="carat_${variantIndex}">Carat</label>
+                    <input type="number" step="0.01" class="form-control" 
+                           name="variant_${variantIndex}_carat" id="carat_${variantIndex}" 
+                           placeholder="Carat" required oninput="updateVariantData(${variantIndex})">
+                    
+                    <label for="price_${variantIndex}" class="mt-2">Price</label>
+                    <input type="number" step="0.01" class="form-control" 
+                           name="variant_${variantIndex}_price" id="price_${variantIndex}" 
+                           placeholder="Price" required oninput="updateVariantData(${variantIndex})">
+                    
+                    <label for="stock_${variantIndex}" class="mt-2">Stock</label>
+                    <input type="number" step="1" class="form-control" 
+                           name="variant_${variantIndex}_stock" id="stock_${variantIndex}" 
+                           placeholder="Stock" required oninput="updateVariantData(${variantIndex})">
+                    
+                    <button type="button" class="btn btn-danger mt-2" 
+                            onclick="removeVariant(${variantIndex})">Remove Variant</button>
+                    <hr>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', variantHTML);
+            variants.push({ carat: '', price: '', stock: '' });
+            variantIndex++;
+        }
+        
+        function updateVariantData(index) {
+            variants[index] = {
+                carat: document.getElementById(`carat_${index}`).value,
+                price: document.getElementById(`price_${index}`).value,
+                stock: document.getElementById(`stock_${index}`).value,
+            };
+            document.getElementById('variantsData').value = JSON.stringify(variants);
+        }
+        
+        function removeVariant(index) {
+            document.getElementById(`variant_${index}`).remove();
+            variants.splice(index, 1);
+            document.getElementById('variantsData').value = JSON.stringify(variants);
+        }
+        </script>
+        
 
     <button type="submit">Update Product</button>
 </form>

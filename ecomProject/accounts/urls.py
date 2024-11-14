@@ -2,7 +2,7 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from .views import *
 from products.views import product_detail
-from .views import CustomPasswordResetView, edit_profile,  UserAddressesView, AddAddressView, EditAddressView, DeleteAddressView, SetDefaultAddressView
+from .views import CustomPasswordResetView, edit_profile,  UserAddressesView, AddAddressView, EditAddressView, DeleteAddressView, set_default_address
 from . import views
 from products.views import ProductListView
 
@@ -32,7 +32,7 @@ urlpatterns = [
     path('add_address/', views.AddAddressView.as_view(), name='add_address'),
     path('edit_address/<int:pk>/', views.EditAddressView.as_view(), name='edit_address'),
     path('delete_address/<int:pk>/', views.DeleteAddressView.as_view(), name='delete_address'),
-    path('set_default_address/', views.SetDefaultAddressView.as_view(), name='set_default_address'),
+     path('set-default-address/<int:address_id>/', views.set_default_address, name='set_default_address'),
 ]
 
  

@@ -129,10 +129,7 @@
 					<div class="menu-desktop">
 						<ul class="main-menu">
 							<li>
-								<a href="index.html">Home</a>
-								<ul class="sub-menu">
-									<li><a href="{url 'home' }">Home</a></li>
-								</ul>
+								<a href="{% url 'home' %}">Home</a>
 							</li>
 
 							<li>
@@ -140,7 +137,7 @@
 							</li>
 
 							<li class="label1" data-label1="hot">
-								<a href="shoping-cart.html">Features</a>
+								<a href="{% url 'cart_summary' %}">Features</a>
 							</li>
 
 
@@ -148,7 +145,7 @@
 								<a href="{% url 'about' %}">About</a>
 							</li>
 
-							<li class="active-menu">
+							<li>
 								<a href="{% url 'contact' %}">Contact</a>
 							</li>
 						</ul>
@@ -380,7 +377,7 @@
                 {% if address.is_default %}
                     <span class="default-tag">DEFAULT</span>
                 {% else %}
-                    <button onclick="setDefaultAddress({{ address.id }})">Set as Default</button>
+                    <button onclick="setDefaultAddress('{{ address.id }}')">Set as Default</button>
                 {% endif %}
             </li>
         {% empty %}
@@ -390,7 +387,7 @@
     
     <script>
         function setDefaultAddress(addressId) {
-            fetch("{% url 'set_default_address' %}", {
+            fetch(`/set-default-address/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": "{{ csrf_token }}",
@@ -401,17 +398,16 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert("This address has been set as the default address.");
-                    location.reload();  
+                    alert("Address set as default!");
+                    location.reload(); // Reload the page to reflect changes
                 } else {
                     alert("Failed to set default address.");
                 }
             })
-            .catch(error => {
-                console.error("Error:", error);
-            });
+            .catch(error => console.error("Error:", error));
         }
     </script>
+    
     
 
 <footer class="bg3 p-t-75 p-b-32">

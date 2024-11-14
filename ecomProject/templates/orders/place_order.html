@@ -1,0 +1,55 @@
+<form method="post" action="{% url 'orders:place_order' %}" class="bg0 p-t-75 p-b-85">
+    {% csrf_token %}
+    <div class="container">
+        <div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
+            <div class="m-l-25 m-r--38 m-lr-0-xl">
+                <div class="wrap-table-shopping-cart">
+                    <h4 class="card-title mb-4">Billing Address</h4>
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" id="first_name" name="first_name" class="form-control" required>
+                        {{ form.first_name.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" class="form-control" required>
+                        {{ form.last_name.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" class="form-control" required>
+                        {{ form.email.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="text" id="phone" name="phone" class="form-control" required>
+                        {{ form.phone.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="address_line1">Address Line 1</label>
+                        <input type="text" id="address_line1" name="address_line1" class="form-control" required>
+                        {{ form.address_line1.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" id="city" name="city" class="form-control" required>
+                        {{ form.city.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" id="state" name="state" class="form-control" required>
+                        {{ form.state.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <input type="text" id="country" name="country" class="form-control" required>
+                        {{ form.country.errors }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
+            Place Order
+        </button>
+    </div>
+</form>

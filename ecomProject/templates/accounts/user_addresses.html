@@ -197,9 +197,9 @@
 					<div class="menu-desktop">
 						<ul class="main-menu">
 							<li>
-								<a href="index.html">Home</a>
+								<a href="{% url 'home' %}">Home</a>
 								<ul class="sub-menu">
-									<li><a href="{url 'home' }">Home</a></li>
+									<li><a href="{% url 'home' %}">Home</a></li>
 								</ul>
 							</li>
 
@@ -466,16 +466,18 @@
         <div class="address-list">
             {% for address in addresses %}
             <div class="address-item">
-                <p class="address-name">
-                    {{ address.name }}
-                    {% if address.is_default %}
-                        <span class="default-tag">DEFAULT</span>
-                    {% else %}
-                        <button onclick="setDefaultAddress({{ address.id }})" class="action-btn">Set as Default</button>
-                    {% endif %}
+                <p>{{ address.address_line }}, {{ address.city }}</p>
+                {% if not address.is_default %}
+                <a href="javascript:void(0);" class="set-default" data-address-id="{{ address.id }}">Set as Default</a>
+                {% else %}
+                    <strong>Default Address</strong>
+                {% endif %}
+            
+                <p>Address: {{ address.address_line1 }},<br/>
+                    city: {{ address.city }},<br/> 
+                    state :{{ address.state }} <br/>
                 </p>
-                <p>{{ address.address_line1 }}, {{ address.city }}, {{ address.state }}</p>
-                <p>Phone Number: {{ address.phone }}</p>
+                <p>Phone Number: {{ address.contact_number }}</p>
                 
                 <div class="address-actions">
                     <a href="{% url 'edit_address' address.id %}" class="action-btn">Edit Address</a>
@@ -488,28 +490,33 @@
     </div>
     
     <script>
-        function setDefaultAddress(addressId) {
-            fetch("{% url 'set_default_address' %}", {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ address_id: addressId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("This address has been set as the default address.");
-                    location.reload();  
-                } else {
-                    alert("Failed to set default address.");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
+        document.addEventListener('DOMContentLoaded', function() {
+            const setDefaultLinks = document.querySelectorAll('.set-default');
+            
+            setDefaultLinks.forEach(function(link) {
+                link.addEventListener('click', function() {
+                    const addressId = this.getAttribute('data-address-id');
+                    
+                    fetch("{% url 'set_default_address' 0 %}".replace('0', addressId), {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update the UI to reflect the change
+                            // For example, change the text of the link or hide it
+                            this.textContent = 'Default Address';
+                            this.style.fontWeight = 'bold';
+                        } else {
+                            alert('Failed to set default address');
+                        }
+                    });
+                });
             });
-        }
+        });
     </script>
     
 </div>

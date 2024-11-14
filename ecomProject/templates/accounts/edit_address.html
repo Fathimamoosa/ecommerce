@@ -128,9 +128,9 @@
 					<div class="menu-desktop">
 						<ul class="main-menu">
 							<li>
-								<a href="index.html">Home</a>
+								<a href="{% url 'home' %}">Home</a>
 								<ul class="sub-menu">
-									<li><a href="{url 'home' }">Home</a></li>
+									<li><a href="{% url 'home' %}">Home</a></li>
 								</ul>
 							</li>
 
@@ -139,7 +139,7 @@
 							</li>
 
 							<li class="label1" data-label1="hot">
-								<a href="shoping-cart.html">Features</a>
+								<a href="{% url 'cart_summary' %}">Features</a>
 							</li>
 
 
