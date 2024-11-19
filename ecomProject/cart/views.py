@@ -18,7 +18,6 @@ def cart_summary(request):
         item.sub_total = item.variant.price * item.quantity  
     
     total_price = sum(item.sub_total for item in cart_items)
-    print(total_price)
     return render(
         request, 
         'cart/cart_summary.html', 
@@ -28,26 +27,26 @@ def cart_summary(request):
         }
     )
 
-    return render(request, "cart/cart_summary.html", {})
+    
 
-# def cart_delete(request, variant_id):
-#     variant = Variant.objects.get(id=variant_id)
-#     if request.user.is_authenticated:
-#         cart_item = CartItem.objects.get(variant=variant, cart_id=request.user.id)
+def cart_delete(request, variant_id):
+    variant = Variant.objects.get(id=variant_id)
+    if request.user.is_authenticated:
+        cart_item = CartItem.objects.get(variant=variant, cart__cart_id=request.user.id)
 
-#     else:
-#         cart = Cart.objects.get(cart_id=_cart_id(request))
-#         cart_item = CartItem.objects.get(variant=variant, cart=cart)
+    else:
+        cart = Cart.objects.get(cart_id=_cart_id(request))
+        cart_item = CartItem.objects.get(variant=variant, cart=cart)
 
-#     cart_item.delete()
-#     return redirect("cart_summary")
+    cart_item.delete()
+    return redirect("cart_summary")
 
     
-# def delete(self, variant):
-#     { '4': 3, '2':1 }
-#     variant_id =str(variant)
-#     if variant_id in self.cart:
-#         del self.cart[variant_id]
+def delete(self, variant):
+    { '4': 3, '2':1 }
+    variant_id =str(variant)
+    if variant_id in self.cart:
+        del self.cart[variant_id]
 
 
 def cart_update(request):
@@ -106,58 +105,20 @@ def add_cart(request, variant_id):
 
     return redirect("cart_summary")
 
-
-# def remove_from_cart(request, variant_id):
-#     variant = Variant.objects.get(id = variant_id)
-#     if request.user.is_authenticated:
-#         cart_item = CartItem.objects.get(variant=variant, cart_id=request.user.id)
-#     else:
-#         cart = Cart.objects.get(cart_id=_cart_id(request))
-#         cart_item = CartItem.objects.get(variant=variant, cart=cart)
-
-#     if cart_item.quantity > 1:
-#         cart_item.quantity -= 1
-#         cart_item.save()
-#     else:
-#         cart_item.delete()
-#     return redirect("cart_summary")
     
-
-def cart_delete(request, variant_id):
-    try:
-        variant = Variant.objects.get(id=variant_id)
-    except Variant.DoesNotExist:
-        messages.error(request, "Variant does not exist.")
-        return redirect("cart_summary")
-
-    if request.user.is_authenticated:
-        cart_items = CartItem.objects.filter(variant=variant, cart_id=request.user.id)
-    else:
-        cart = Cart.objects.filter(cart_id=_cart_id(request)).first()
-        if not cart:
-            messages.error(request, "Cart does not exist.")
-            return redirect("cart_summary")
-        cart_items = CartItem.objects.filter(variant=variant, cart=cart)
-
-    if cart_items.exists():
-        cart_item = cart_items.first()
-        cart_item.is_active = False  # Soft delete by marking as inactive
-        cart_item.save()
-        messages.success(request, "Item removed from the cart.")
-    else:
-        messages.error(request, "Item not found in the cart.")
-
-    return redirect("cart_summary")
 
 def remove_from_cart(request, variant_id):
     try:
         variant = Variant.objects.get(id=variant_id)
+        
         if request.user.is_authenticated:
-            cart_item = CartItem.objects.get(variant=variant, cart_id=request.user.id)
+            
+            cart_item = CartItem.objects.get(variant=variant, cart__cart_id=request.user.id)
+            
         else:
             cart = Cart.objects.get(cart_id=_cart_id(request))
             cart_item = CartItem.objects.get(variant=variant, cart=cart)
-
+     
         if cart_item.quantity > 1:
             cart_item.quantity -= 1
             cart_item.save()
@@ -166,5 +127,6 @@ def remove_from_cart(request, variant_id):
 
         return redirect("cart_summary")
     except CartItem.DoesNotExist:
+     
         messages.error(request, "Item not found in the cart.")
         return redirect("cart_summary")

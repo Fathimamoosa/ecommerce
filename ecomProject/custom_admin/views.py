@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views import View
-from .forms import CustomUserForm, CustomLoginForm
+from .forms import CustomUserForm, CustomLoginForm 
 from accounts.models import *
 from category.models import Category
 from django.utils import timezone
@@ -12,29 +12,50 @@ from .forms import CategoryForm
 
 
 def admin_check(user):
-    return user.is_authenticated and user.is_staff
-
+    return user.is_authenticated and user.is_staff and user.is_superuser
 
 class LoginView(View):
     def get(self, request):
         form = CustomLoginForm()
+        print('90')
         return render(request, 'custom_admin/login.html', {'form': form})
 
     def post(self, request):
         form = CustomLoginForm(request, data=request.POST)
         if form.is_valid():
-            email = form.cleaned_data.get('username')
+            username = form.cleaned_data.get('username')  # Maps to email
             password = form.cleaned_data.get('password')
-            user = authenticate(request, username=email, password=password)
-            if user is not None:
-                if user.is_staff:
-                    login(request, user)
-                    return redirect('dashboard')
-                else:
-                    messages.add_message(request, messages.ERROR, "You do not have permission to access this site.")
+            print(f"Attempting to authenticate: {username} with password {password}")
+            user = authenticate(request, username=username, password=password)
+            if user:
+                login(request, user)
+                return redirect('dashboard')
+                print(f"Authenticated user: {user.email}")
             else:
-                messages.add_message(request, messages.ERROR, "Invalid email or password.")
+                print("Authentication failed.")
         return render(request, 'custom_admin/login.html', {'form': form})
+
+    # def post(self, request):
+    #     form = CustomLoginForm(request, data=request.POST)
+    #     if form.is_valid():
+            
+    #         email = form.cleaned_data.get('email') 
+    #         password = form.cleaned_data.get('password')
+    #         user = authenticate(request, email=email, password=password)
+    #         print(f"Authenticated user: {user}")
+    #         if user:
+    #             if user.is_staff and user.is_superuser:
+    #                 login(request, user)
+    #                 print('00')
+    #                 return redirect('dashboard')  
+    #             else:
+    #                 messages.error(request, "You do not have permission to access this site.")
+    #         else:
+    #             messages.error(request, "Invalid email or password.")
+    #     else:
+    #         messages.error(request, "Form validation failed. Please try again.")
+    #         print('67')
+    #     return render(request, 'custom_admin/login.html', {'form': form})
 
 def dashboard(request):
     return render(request, 'custom_admin/dashboard.html')

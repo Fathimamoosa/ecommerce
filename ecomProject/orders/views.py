@@ -1,17 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Order, OrderItem, ShippingAddress
+from .models import Order, OrderItem
 from django.core.paginator import Paginator
 from cart.models import Cart
 from django.contrib.auth.decorators import login_required
-from .models import Address
 from cart.models import CartItem
 import datetime
 from django.contrib import messages
-from orders.forms import ShippingForm
-from orders.models import ShippingAddress
-
-
-
+from products.models import Variant
+import random
+import uuid
 
 # Create your views here.
 def order_list(request):
@@ -27,244 +24,114 @@ def order_list(request):
     return render(request, 'orders/order_list.html', context)
 
 
-# def checkout(request):
-#     order = Order.objects.create(order_id=request.user.id)
-#     for item in order:
-#                 OrderItem.objects.create(
-#                     order=order,
-#                     product=item['product'],
-#                     quantity=item['quantity'],
-#                     price=item['price']
-#                 )
-#     order.clear()
-#     return redirect('order_confirmation', order_id=order.id)
-
-# def checkout(request):
-#     cart = Cart(request)
-#     if request.method == 'POST':
-#         # Create an order
-#         order = Order.objects.create(
-#             user=request.user,
-#             total_price=cart.total_price,
-#             payment_method=request.POST.get('payment_method'),
-#             order_number='ORD' + str(Order.objects.count() + 1)
-#         )
-
-#         # Add cart items as order items
-#         for item in cart:
-#             OrderItem.objects.create(
-#                 order=order,
-#                 product=item['product'],
-#                 variant=item.get('variant'),  # Optional
-#                 quantity=item['quantity'],
-#                 price=item['price']
-#             )
-
-#         cart.clear()  # Clear cart after placing the order
-#         return redirect('order_confirmation', order_id=order.id)
-
-#     return render(request, 'orders/checkout.html', {'cart': cart})
+def _cart_id(request):
+    cart = request.session.session_key
+    if not cart:
+        cart = request.session.create()
+    return cart
 
 
 
-# @login_required
-# def select_address(request, address_id):
-#     Address.objects.filter(user=request.user).update(is_selected=False)
+@login_required
+def place_order(request):
+    if request.method == 'POST':
+        unique_order_number = str(uuid.uuid4().int)[:12]  # 12-character unique order number
+        neworder =Order()
+        neworder.user=request.user
+        neworder.fname = request.POST.get('fname')
+        neworder.lname = request.POST.get('lname')
+        neworder.address = request.POST.get('address')
+        neworder.phone = request.POST.get('phone')
+        neworder.email = request.POST.get('email')
+        neworder.city = request.POST.get('city')
+        neworder.country = request.POST.get('country')
+        neworder.state = request.POST.get('state')
+        neworder.pincode = request.POST.get('pincode')
+        neworder.payment_method = request.POST.get('payment_method')
+        neworder.order_number = unique_order_number
     
-   
-#     address = get_object_or_404(Address, id=address_id)
-#     address.is_selected = True
-#     address.save()
+        if not request.user.is_authenticated:
+            messages.error(request, "You must be logged in to place an order.")
+            return redirect('login')
 
-    
-#     return redirect('checkout')
+        cart = get_object_or_404(Cart, cart_id=request.user.id)  # Assuming a user-cart relationship
+        cart_items = CartItem.objects.filter(cart=cart)
+        
+        if not cart_items.exists():
+            messages.error(request, "Your cart is empty.")
+            return redirect('cart_summary')
+        
+        total_price = sum(item.variant.price * item.quantity for item in cart_items)
+        neworder.total_price = total_price
+        neworder.save()
+
+        # Update status for COD
+        if neworder.payment_method == "Cash On Delivery":
+            neworder.status = "Confirmed"
+
+        neworder.save()
+           
+        # Add items to the order
+        neworderitems = Cart.objects.filter(cart_id=cart)
+        for item in neworderitems:
+            OrderItem.objects.create(
+                order=neworder,
+                product=item.variant.product.product_name,
+                variant=item.variant.carat,  
+                quantity=item.quantity,
+                price=item.variant.price,
+            )
+            item.variant.quantity -= item.quantity
+            item.variant.save()
+
+        cart_items.delete()
+
+        
+        
+
+        return redirect('orders:order_success', order_number=neworder.order_number, total_price=neworder.total_price)
+
+    return redirect('/')
 
 
 def checkout(request):
-    cart = Cart(request)
-    
-    # Fetch the selected address for the user
-
-    selected_address = Address.objects.filter( is_default=True).first()
-
-    if request.method == 'POST':
-        if not selected_address:
-            # Handle the case where no address is selected
-            return render(request, 'orders/checkout.html', {
-                'cart': cart,
-                'error': 'Please select an address before proceeding.',
-            })
-
-        # Create an order with the selected address
-        order = Order.objects.create(
-            user=request.user,
-            total_price=cart.total_price,
-            payment_method=request.POST.get('payment_method'),
-            order_number='ORD' + str(Order.objects.count() + 1),
-            address=selected_address,  # Include the selected address in the order
-        )
-
-        # Add cart items as order items
-        for item in cart:
-            OrderItem.objects.create(
-                order=order,
-                product=item['product'],
-                variant=item.get('variant'),  # Optional
-                quantity=item['quantity'],
-                price=item['price']
-            )
-
-        cart.clear()  # Clear cart after placing the order
-        return redirect('order_confirmation', order_id=order.id)
-
-    return render(request, 'orders/checkout.html', {
-        'cart': cart,
-        'selected_address': selected_address,
-    })
-
-
-# def place_order(request, total=0, quantity=0):
-#     current_user =request.user
-
-#     cart_items = CartItem.objects.filter(user=current_user)
-#     cart_count = cart_items.count()
-
-#     # if cart items is zero, redirect user to cart page
-#     if cart_count <= 0:
-#         return redirect("cart_summary")
-    
-#     quantity = 0
-#     total = 0
-#     for cart_item in cart_items:
-#         total += cart_item.variant.price * cart_item.quantity
-#         quantity += cart_item.quantity
-
-    
-#     if request.method == 'POST':
-#         form= Orderform(request.POST)
-#         if form.is_valid():
-#             data = Order(
-#                 first_name = form.cleaned_data['first_name'],
-#                 last_name = form.cleaned_data['last_name'],
-#                 phone = form.cleaned_data['phone'],
-#                 email = form.cleaned_data['email'],
-#                 address_line1 = form.cleaned_data['address_line1'],
-#                 country= form.cleaned_data['country'],
-#                 state = form.cleaned_data['state'],
-#                 city= form.cleaned_data['city'],
-#                 pincode = form.cleaned_data['pincode']
-#             )
-#             data.save()
-
-#             # Generate order number
-#             yr = int(datetime.date.today().strftime("%Y"))
-#             dt = int(datetime.date.today().strftime("%d"))
-#             mt = int(datetime.date.today().strftime("%m"))
-#             d = datetime.date(yr, mt, dt)
-#             current_date = d.strftime("%y%m%d")
-#             order_number = current_date + str(data.id)
-#             data.order_number = order_number
-#             data.save()       
-#             return redirect('checkout')
-#         else:
-#             return redirect('checkout')
-
-def place_order(request, total=0, quantity=0):
-    current_user = request.user
-
-    cart_items = CartItem.objects.filter(user=current_user)
-    if not cart_items.exists():
-        return redirect("cart_summary")  # Redirect if no items in the cart
-
-    total = sum(item.variant.price * item.quantity for item in cart_items)
-    quantity = sum(item.quantity for item in cart_items)
-
-    if request.method == 'POST':
-        shipping_form = ShippingForm(request.POST)
-        if shipping_form.is_valid():
-            # Save the shipping address
-            shipping_address = shipping_form.save(commit=False)
-            shipping_address.user = current_user
-            shipping_address.save()
-
-           
-            order = Order.objects.create(
-                user=current_user,
-                total_price=total,
-                is_ordered=True,
-            )
-
-    
-            yr = int(datetime.date.today().strftime("%Y"))
-            dt = int(datetime.date.today().strftime("%d"))
-            mt = int(datetime.date.today().strftime("%m"))
-            current_date = datetime.date(yr, mt, dt).strftime("%y%m%d")
-            order_number = current_date + str(order.id)
-            order.order_number = order_number
-            order.save()
-
-            for cart_item in cart_items:
-                OrderItem.objects.create(
-                    order=order,
-                    product=cart_item.variant.product,
-                    variant=cart_item.variant,
-                    quantity=cart_item.quantity,
-                    price=cart_item.variant.price,
-                )
-
-            cart_items.delete()
-
-            return redirect('order_confirmation', order_id=order.id)
-        else:
-            print("Shipping Form errors:", shipping_form.errors) 
-
+    if request.user.is_authenticated:
+        cart = get_object_or_404(Cart, cart_id=request.user.id)
     else:
-        shipping_form = ShippingForm()
+        cart_id = _cart_id(request)
+        cart = get_object_or_404(Cart, cart_id=cart_id)
+    cart_items = CartItem.objects.filter(cart=cart)
+    for item in cart_items:
+        item.sub_total = item.variant.price * item.quantity  
+    
+    total_price = sum(item.sub_total for item in cart_items)
+    return render(
+        request, 
+        'orders/checkout.html', 
+        {
+            'cart_items': cart_items,
+            'total_price': total_price,
+        }
+    )
 
-    # Render the checkout page with forms
-    return render(request, 'checkout.html', {'shipping_form': shipping_form, 'cart_items': cart_items, 'total': total})
+def order_success(request, order_number, total_price):
+    return render(request, 'orders/success.html', {
+        'order_number': order_number,
+        'total_price': total_price,
+    })
+    
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, 'orders/order_detail.html', {'order': order})
 
+def update_order_status(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status:
+            order.status = new_status
+            order.save()
+            messages.success(request, f"Order {order.id} status updated to {new_status}.")
+        return redirect('orders:order_list')  
 
-# def place_order(request):
-#     if request.method == 'POST':
-#         # Extract data from the form
-#         first_name = request.POST.get('first_name')
-#         last_name = request.POST.get('last_name')
-#         email = request.POST.get('email')
-#         phone = request.POST.get('phone')
-#         address_line1 = request.POST.get('address_line1')
-#         city = request.POST.get('city')
-#         state = request.POST.get('state')
-#         country = request.POST.get('country')
-
-#         # Validate required fields (additional validations can be added)
-#         if not all([first_name, last_name, email, phone, address_line1, city, state, country]):
-#             messages.error(request, "All fields are required.")
-#             return redirect('cart')  # Redirect to the cart page
-
-#         # Save the shipping address
-#         shipping_address = ShippingAddress.objects.create(
-#             user=request.user,
-#             first_name=first_name,
-#             last_name=last_name,
-#             email=email,
-#             phone=phone,
-#             address_line1=address_line1,
-#             city=city,
-#             state=state,
-#             country=country
-#         )
-
-#         # Create an order
-#         order = Order.objects.create(
-#             user=request.user,
-#             shipping_address=shipping_address,
-#             total_price=request.session.get('cart_total_price', 0)  # Fetch from session or calculate
-#         )
-
-#         # Clear cart session
-#         request.session['cart_items'] = {}
-#         messages.success(request, "Your order has been placed successfully!")
-#         return redirect('order_success')  # Redirect to success page
-
-#     return redirect('cart')
+    return redirect('orders:order_list')

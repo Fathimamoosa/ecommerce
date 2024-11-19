@@ -27,6 +27,7 @@ urlpatterns = [
     path('contact/', views.contact, name='contact'),
     path('product/', ProductListView.as_view(template_name='products/product.html'), name='product_list'),
     path('profile/', views.UserProfileView.as_view(), name='profile'),
+    path('order-items/', views.user_order_items, name='orders'),
     path('edit_profile/', views.edit_profile, name='edit_profile'),
     path('user_addresses/', views.UserAddressesView.as_view(), name='user_addresses'),
     path('add_address/', views.AddAddressView.as_view(), name='add_address'),

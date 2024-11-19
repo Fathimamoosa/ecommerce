@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+</head>
+<body>
+    <h1>Order Details</h1>
+    <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+    <p><strong>Customer Name:</strong> {{ order.fname }} {{ order.lname }}</p>
+    <p><strong>Email:</strong> {{ order.email }}</p>
+    <p><strong>Phone:</strong> {{ order.phone }}</p>
+    <p><strong>Address:</strong> {{ order.address }}, {{ order.city }}, {{ order.state }}, {{ order.country }} - {{ order.pincode }}</p>
+    <p><strong>Total Price:</strong> ${{ order.total_price }}</p>
+    <p><strong>Order Status:</strong> {{ order.status }}</p>
+    <p><strong>Order Date:</strong> {{ order.order_date|date:"d.m.Y" }}</p>
+
+    <h2>Order Items</h2>
+    <ul>
+        {% for item in order.items.all %}
+        <li>{{ item.product.product_name }} - {{ item.variant.carat }} carat (x{{ item.quantity }}) - ${{ item.price }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'orders:order_list' %}">Back to Orders</a>
+</body>
+</html>

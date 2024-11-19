@@ -3598,3 +3598,31 @@ input.num-product::-webkit-inner-spin-button {
 
 
 }
+.success-container {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.success-container h1 {
+  color: #4caf50;
+  font-size: 2.5em;
+}
+
+.success-container p {
+  font-size: 1.2em;
+  margin: 10px 0;
+}
+
+.success-container .btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+.success-container .btn:hover {
+  background-color: #45a049;
+}

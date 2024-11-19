@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test, login_required
-from .models import Products, ProductImage, Variant, Category, Brand
+from .models import Products, ProductImage, Variant, Category, Brand, Review
 from .forms import ProductForm
 import base64
 import json
@@ -15,6 +15,8 @@ from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from cart.views import _cart_id
 from cart.models import CartItem
+from django.db.models import Min, Max
+from .forms import ReviewForm
 
 def custom_admin_required(user):
     return user.is_staff  
@@ -178,6 +180,8 @@ def product_detail(request, pk):
     images = ProductImage.objects.filter(products=product)
     in_cart = CartItem.objects.filter(cart__cart_id= _cart_id(request), variant= variant).exists()
     
+    related_products = Products.objects.filter(category=product.category).exclude(id=product.id)[:5]
+
     if variant.stock > 0:
         # Logic to add product to cart or process order
         variant.stock -= 1
@@ -185,17 +189,67 @@ def product_detail(request, pk):
         print(variant.stock)
         
 
-    related_products = Products.objects.filter(category=product.category).exclude(id=product.id)[:5]  
+    if request.method == 'POST':
+        review_form = ReviewForm(request.POST)
+        if review_form.is_valid():
+            review = review_form.save(commit=False)
+            review.product = product
+            if request.user.is_authenticated:
+                review.user = request.user
+            review.save()
+            messages.success(request, "Thank you for your review!")
+            return redirect('product_detail', pk=pk)
+        else:
+            messages.error(request, "Please correct the errors in the review form.")
+
+    else:
+        review_form = ReviewForm()
+
+    # Fetch existing reviews
+    reviews = Review.objects.filter(product=product).order_by('-created_date')
+
     context = {
         'product': product,
-        'variant' : variant,
-        'variants' : variants,
+        'variant': variant,
+        'variants': variants,
         'images': images,
-        'related_products': related_products,  
-        'in_cart' : in_cart,
+        'related_products': related_products,
+        'in_cart': in_cart,
+        'reviews': reviews,
+        'review_form': review_form,  # Pass the form to the template
     }
-    print(context)
-    return render(request, 'products/product-detail.html', context )
+    return render(request, 'products/product-detail.html', context)
+
+        # Optional: You could check if a user is logged in and use the user ID
+        # if request.user.is_authenticated:
+        #     user = request.user
+        # else:
+        #     user = None  # or use a default name for anonymous users
+
+        # if rating and review_text:
+        #     Review.objects.create(
+        #         product=product,
+        #         user=user,
+        #         rating=rating,
+        #         review_text=review_text
+        #     )
+
+    #     return redirect('product_detail', pk=pk)  # Redirect after form submission to avoid resubmission
+
+    # # Get reviews for the product
+    # reviews = Review.objects.filter(product=product).order_by('-created_date')
+
+    # context = {
+    #     'product': product,
+    #     'variant': variant,
+    #     'variants': variants,
+    #     'images': images,
+    #     'related_products': related_products,
+    #     'in_cart': in_cart,
+    #     'reviews': reviews,  # Pass the reviews to the template
+    # }
+
+    # return render(request, 'products/product-detail.html', context)
 
 class DeleteImageView(View):
     def get(self, request, image_id):
@@ -215,14 +269,110 @@ class ProductImageView(View):
 @login_required
 def product_view(request, product_id):
     product = Products.objects.get(id=product_id)
-    product_images = product.images.all() 
     categories = Category.all_objects.all()
+
+    # Sorting for product images
+    sort_by = request.GET.get('sort')  # Get the sorting parameter
+    product_images = product.images.all()
+
+    if sort_by == 'a_to_z':
+        product_images = product_images.order_by('id')  # Adjust 'id' to a relevant field
+    elif sort_by == 'z_to_a':
+        product_images = product_images.order_by('-id')  # Adjust '-id' to a relevant field
+
     return render(request, 'products/product.html', {
         'product': product,
         'product_images': product_images,
         'categories': categories
     })
+# def product_view(request, product_id):
+#     product = Products.objects.get(id=product_id)
+#     product_images = product.images.all() 
+#     categories = Category.all_objects.all()
+#     return render(request, 'products/product.html', {
+#         'product': product,
+#         'product_images': product_images,
+#         'categories': categories
+#     })
     
+
+
+class ProductListView1(ListView):
+    model = Products
+    template_name = 'product.html'
+    context_object_name = 'products'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        selected_categories = [int(id) for id in self.request.GET.getlist('category') if id.isdigit()]
+        context['selected_categories'] = selected_categories
+        return context
+
+    def get_queryset(self):
+        queryset = Products.objects.filter(category__is_deleted=False)  
+        categories = self.request.GET.getlist('category')
+        if categories:
+            queryset = queryset.filter(category_id__in=categories)
+        return queryset
+
+class ProductListView(ListView):
+    model = Variant
+    template_name = 'product.html'
+    context_object_name = 'variants'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        categories = Category.objects.all()
+        context['categories'] = categories
+        selected_categories = [int(id) for id in self.request.GET.getlist('category') if id.isdigit()]
+        context['selected_categories'] = selected_categories
+        context['sort'] = self.request.GET.get('sort', '') 
+        # Add price range to the context
+        context['min_price'] = self.request.GET.get('min_price', '')
+        context['max_price'] = self.request.GET.get('max_price', '') 
+        context['query'] = self.request.GET.get('q', '') # Add current sort to context
+        return context
+
+    def get_queryset(self):
+
+        # queryset = Products.objects.filter(is_deleted=False, is_available=True)
+        queryset = Variant.objects.filter(product__category__is_deleted=False)
+        categories = self.request.GET.getlist('category')
+        sort = self.request.GET.get('sort')
+        query = self.request.GET.get('q')
+
+        # Filter by category
+        if categories:
+            queryset = queryset.filter(product__category_id__in=categories)
+
+        # Sort by the requested order
+        sort_by = self.request.GET.get('sort')
+        if sort_by == 'a_to_z':
+            queryset = queryset.order_by('product__product_name')  # Use correct field
+        elif sort_by == 'z_to_a':
+            queryset = queryset.order_by('-product__product_name')  # Use correct field
+        if query:
+            queryset = queryset.filter(
+                product__product_name__icontains=query
+            ) | queryset.filter(
+                product__description__icontains=query
+            )
+
+        min_price = self.request.GET.get('min_price')
+        max_price = self.request.GET.get('max_price')
+        if min_price:
+            queryset = queryset.filter(price__gte=min_price)
+        if max_price:
+            queryset = queryset.filter(price__lte=max_price)
+        if sort == 'price_low_to_high':
+            queryset = queryset.order_by('price')
+        elif sort == 'price_high_to_low':
+            queryset = queryset.order_by('-price')
+        # elif sort == 'new_arrival':
+        #     queryset = queryset.order_by('-product__created_date')
+
+        return queryset.distinct()
+
 # def search_products_view(request):
 #     query = request.GET.get("search-product")
 #     print("Search Query:", query) 
@@ -276,41 +426,3 @@ def product_view(request, product_id):
 #         'categories': categories,
 #         'brands': brands,
 #     })
-
-class ProductListView1(ListView):
-    model = Products
-    template_name = 'product.html'
-    context_object_name = 'products'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        selected_categories = [int(id) for id in self.request.GET.getlist('category') if id.isdigit()]
-        context['selected_categories'] = selected_categories
-        return context
-
-    def get_queryset(self):
-        queryset = Products.objects.filter(category__is_deleted=False)  
-        categories = self.request.GET.getlist('category')
-        if categories:
-            queryset = queryset.filter(category_id__in=categories)
-        return queryset
-
-class ProductListView(ListView):
-    model = Variant
-    template_name = 'product.html'
-    context_object_name = 'variants'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        categories = Category.objects.all()
-        context['categories'] = categories
-        selected_categories = [int(id) for id in self.request.GET.getlist('category') if id.isdigit()]
-        context['selected_categories'] = selected_categories
-        return context
-
-    def get_queryset(self):
-        queryset = Variant.objects.filter(product__category__is_deleted=False) 
-        categories = self.request.GET.getlist('category')
-        if categories:
-            queryset = queryset.filter(product__category_id__in=categories)
-        return queryset

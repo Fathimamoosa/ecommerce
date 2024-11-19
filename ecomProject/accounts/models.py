@@ -19,11 +19,11 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    # def create_superuser(self, email, password=None, **extra_fields):
-    #     extra_fields.setdefault('is_staff', True)
-    #     extra_fields.setdefault('is_superuser', True)
-
-    #     return self.create_user(email, password, **extra_fields)
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
+        return self.create_user(email, password, **extra_fields)
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -54,7 +54,7 @@ class Profile(models.Model):
     
 class Address(models.Model):
     
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, blank=False, default=None)
     address_line1 = models.CharField(max_length=255, blank=False)
     address_line2 = models.CharField(max_length=255, blank=True) 

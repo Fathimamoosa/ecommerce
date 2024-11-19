@@ -18,7 +18,7 @@ from django.views.generic import UpdateView, DetailView, ListView, CreateView, D
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.contrib.auth import logout
-
+from orders.models import Order, OrderItem
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'accounts/password_reset.html'  
@@ -34,30 +34,33 @@ backend = 'custom_admin.auth_backends.EmailBackend'
 
 
 
-# def custom_login(request):
-#     if request.method == 'POST':
-#         form = CustomAuthenticationForm(request.POST)
-#         if form.is_valid():
-#             username= form.cleaned_data.get('email')  
-#             password = form.cleaned_data.get('password')
+def custom_login(request):
+    if request.method == 'POST':
+        form = CustomAuthenticationForm(request.POST)
+        if form.is_valid():
+            email= form.cleaned_data.get('email')  
+            password = form.cleaned_data.get('password')
 
-#             user = authenticate(request, username=username, password=password)
+            user = authenticate(request, username=email, password=password)
 
-#             if user is not None:
-#                 if user.is_blocked:
-#                     messages.error(request, 'Your account is blocked.')
-#                 else:
-#                     # login(request, user)
-#                     # messages.success(request, f'Welcome, {user.email if user.email else user.username}!')
-#                     return redirect('home')
-#             else:
-#                 messages.error(request, 'Invalid username or email and password combination.')
-#         else:
-#             messages.error(request, 'Form validation failed.')
-#     else:
-#         form = CustomAuthenticationForm()
+            if user is not None:
+                if user.is_superuser or user.is_staff:
+                    messages.error(request, 'Admin accounts cannot log in from the user side.')
+                elif user.is_blocked:
+                    messages.error(request, 'Your account is blocked.')
+                else:
+                    login(request, user)  # Log the user in
+                    messages.success(request, f'Welcome, {user.email if user.email else user.username}!')
+                    return redirect('home')  # Redirect to the desired page after login
+            else:
+                messages.error(request, 'Invalid username or email and password combination.')
+        else:
+            messages.error(request, 'Form validation failed.')
+    else:
+        form = CustomAuthenticationForm()
 
-#     return render(request, 'accounts/login.html', {'form': form})
+    return render(request, 'accounts/login.html', {'form': form})
+                
 
 
 class LogoutView(View):
@@ -66,7 +69,6 @@ class LogoutView(View):
         return redirect('accounts_login')
 
 
-@login_required
 def home(request):
     products = Products.objects.filter(category__is_deleted=False).prefetch_related('images')
     categories = Category.objects.filter(is_deleted=False)
@@ -224,27 +226,10 @@ class DeleteAddressView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('user_addresses')
     context_object_name = 'address'
 
-    # def post(self, request, *args, **kwargs):
-    #     self.object = self.get_object()
-    #     self.object.delete()
-    #     messages.success(request, "Address deleted successfully.")
-    #     return redirect('user_addresses')
     def delete(self, request, *args, **kwargs):
         messages.success(request, "Address deleted successfully.")
         return super().delete(request, *args, **kwargs)
 
-# class SetDefaultAddressView(LoginRequiredMixin, View):
-#     def post(self, request, *args, **kwargs):
-#         address_id = request.POST.get("address_id")
-#         user = request.user
-
-#         Address.objects.filter(user=user, is_default=True).update(is_default=False)
-#         Address.objects.filter(id=address_id, user=user).update(is_default=True)
-#         Address.is_default = True
-#         Address.save()
-        
-
-#         return JsonResponse({"success": True})
 
 
 def edit_profile(request):
@@ -259,49 +244,25 @@ def edit_profile(request):
     return render(request, 'accounts/edit_profile.html', {'form': form})
 
 
-def custom_login(request):
-    if request.method == 'POST':
-        form = CustomAuthenticationForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('email')  
-            password = form.cleaned_data.get('password')
-
-            # Authenticate the user
-            user = authenticate(request, username=username, password=password)
-
-            if user is not None:
-                # Check if the user is a superuser or staff member
-                if user.is_superuser or user.is_staff:
-                    messages.error(request, 'Admin accounts cannot log in from the user side.')
-                elif user.is_blocked:
-                    messages.error(request, 'Your account is blocked.')
-                else:
-                    login(request, user)  # Log the user in
-                    messages.success(request, f'Welcome, {user.email if user.email else user.username}!')
-                    return redirect('home')  # Redirect to the desired page after login
-            else:
-                messages.error(request, 'Invalid username or email and password combination.')
-        else:
-            messages.error(request, 'Form validation failed.')
-    else:
-        form = CustomAuthenticationForm()
-
-    return render(request, 'accounts/login.html', {'form': form})
 
 @login_required
 def set_default_address(request, address_id):
-    # Ensure only the addresses of the logged-in user can be updated
-    address = get_object_or_404(Address, id=address_id, user=request.user)
 
-    # Unset the current default address if it exists
+    address = get_object_or_404(Address, id=address_id, user=request.user)
     Address.objects.filter(user=request.user, is_default=True).update(is_default=False)
 
-    # Set the selected address as the default
+  
     address.is_default = True
     address.save()
 
     if request.is_ajax():
-        # Respond with a JSON response indicating success
         return JsonResponse({'success': True, 'address_id': address.id})
+    return JsonResponse({'success': False}, status=400)
 
-    return JsonResponse({'success': False}, status=400)# Replace 'address_list' with your desired redirect URL
+def user_order_items(request):
+    if request.user.is_authenticated:
+        orders = Order.objects.filter(user=request.user).order_by('-order_date')
+
+        return render(request, 'accounts/orders.html', {'orders': orders})
+    else:
+        return redirect('login')

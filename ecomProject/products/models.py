@@ -5,6 +5,7 @@ from PIL import Image
 import os
 from brand.models import Brand
 from django.urls import reverse
+from accounts.models import CustomUser
 
  
 
@@ -49,3 +50,13 @@ class Variant(models.Model):
     def get_url(self):
         """Get the URL of the product detail page for this variant."""
         return reverse('products:product_detail', args=[self.product.id])
+
+class Review(models.Model):
+    product = models.ForeignKey(Products, related_name='reviews', on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    rating = models.PositiveSmallIntegerField()
+    comment = models.TextField(blank=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Review for {self.product.product_name} by {self.user.username}"

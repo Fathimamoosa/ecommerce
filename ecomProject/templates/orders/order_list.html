@@ -43,6 +43,8 @@
                             <th>#ID</th>
                             <th scope="col">Name</th>
                             <th scope="col">Email</th>
+                            <th scope="col">Order number</th>
+                            <th scope="col">Address</th>
                             <th scope="col">Total</th>
                             <th scope="col">Status</th>
                             <th scope="col">Date</th>
@@ -53,25 +55,32 @@
                         {% for order in page_obj %}
                         <tr>
                             <td>{{ order.order_number }}</td>
-                            <td><b>{{ order.user.first_name }} {{ order.user.last_name }}</b></td>
-                            <td>{{ order.user.email }}</td>
+                            <td><b>{{ order.fname }} {{ order.lname }}</b></td>
+                            <td>{{ order.email }}</td>
+                            <td>{{ order.phone }}</td>
+                            <td>{{ order.address }}, {{ order.city }}, {{ order.state }}, {{ order.country }} - {{ order.pincode }}</td>
                             <td>{{ order.total_price }}</td>
                             <td>
-                                {% if order.status == "Pending" %}
-                                <span class="badge rounded-pill alert-warning">{{ order.status }}</span>
-                                {% elif order.status == "Cancelled" %}
-                                <span class="badge badge-cancelled">{{ order.status }}</span>
-                                {% else %}
-                                <span class="badge badge-received">{{ order.status }}</span>
-                                {% endif %}
+                                <form method="POST" action="{% url 'orders:update_order_status' order.id %}">
+                                    {% csrf_token %}
+                                    <select name="status">
+                                        <option value="Pending" {% if order.status == "Pending" %}selected{% endif %}>Pending</option>
+                                        <option value="Processing" {% if order.status == "Processing" %}selected{% endif %}>Processing</option>
+                                        <option value="Confirmed" {% if order.status == "Confirmed" %}selected{% endif %}>Confirmed</option>
+                                        <option value="Delivered" {% if order.status == "Delivered" %}selected{% endif %}>Delivered</option>
+                                    </select>
+                                    <button type="submit">Update</button>
+                                </form>
                             </td>
                             <td>{{ order.order_date|date:"d.m.Y" }}</td>
                             <td class="text-end">
-                                <a href="#" class="btn btn-md rounded font-sm">Detail</a>
+                                <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-md rounded font-sm">Detail</a>
                                 <div class="dropdown">
-                                    <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
+                                    <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> 
+                                        <i class="material-icons md-more_horiz"></i> 
+                                    </a>
                                     <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="#">View detail</a>
+                                        <a class="dropdown-item" href="{% url 'orders:order_detail' order.id %}">View detail</a>
                                         <a class="dropdown-item" href="#">Edit info</a>
                                         <a class="dropdown-item text-danger" href="#">Delete</a>
                                     </div>
@@ -80,30 +89,10 @@
                         </tr>
                         {% empty %}
                         <tr>
-                        <td colspan="7" class="text-center">No orders found</td>
+                            <td colspan="9" class="text-center">No orders found</td>
                         </tr>
                         {% endfor %}
-                        
-                        <tr>
-                            <td>2329</td>
-                            <td><b>Darlene Robertson</b></td>
-                            <td>deriene@example.com</td>
-                            <td>$948.55</td>
-                            <td><span class="badge rounded-pill alert-success">Received</span></td>
-                            <td>03.07.2022</td>
-                            <td class="text-end">
-                                <a href="#" class="btn btn-md rounded font-sm">Detail</a>
-                                <div class="dropdown">
-                                    <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="#">View detail</a>
-                                        <a class="dropdown-item" href="#">Edit info</a>
-                                        <a class="dropdown-item text-danger" href="#">Delete</a>
-                                    </div>
-                                </div> <!-- dropdown //end -->
-                            </td>
-                        </tr>
-                    </tbody>
+                    </tbody>                    
                 </table>
             </div> <!-- table-responsive //end -->
         </div> <!-- card-body end// -->
