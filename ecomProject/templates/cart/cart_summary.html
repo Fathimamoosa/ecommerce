@@ -55,7 +55,7 @@
 							Help & FAQs
 						</a>
 
-						<a href="#" class="flex-c-m trans-04 p-lr-25">
+						<a href="{% url 'profile' %}" class="flex-c-m trans-04 p-lr-25">
 							My Account
 						</a>
 
@@ -337,12 +337,12 @@
 									<td class="column-2">{{ cart_item.variant.product.product_name }}</td>
 									<td class="column-3">Rs {{ cart_item.variant.price }}</td>
 									<td class="column-4">
-										<div class="wrap-num-product flex-w m-l-auto m-r-0"  type ="number" name="quantity_{{ cart_item.id }}" value="{{ cart_item.quantity}}" max="3">
+										<div class="wrap-num-product flex-w m-l-auto m-r-0"  type ="number" name="quantity_{{ cart_item.id }}" value="{{ cart_item.quantity}}" max="3"data-cart-id="{{ cart_item.id }}" >
 											<a href="{% url 'remove_from_cart' cart_item.variant.id %}" class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
 												<i class="fs-16 zmdi zmdi-minus"></i>
 											</a>
 											
-											<input class="mtext-104 cl3 txt-center num-product" type="number" name="quantity_{{ cart_item.id }}" value="{{ cart_item.quantity }}" min="1"> 
+											<input class="mtext-104 cl3 txt-center num-product" type="number" name="quantity_{{ cart_item.id }}" value="{{ cart_item.quantity }}" min="1" data-cart-id="{{ cart_item.id }}"> 
 											<a href="{% url 'add_to_cart' cart_item.variant.id %}" class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
 												<i class="fs-16 zmdi zmdi-plus"></i>
 											</a>
@@ -391,8 +391,7 @@
 					</div>
 				</div>
 			</div>
-			
-			</div>
+		
 		
 		</form>
 	
@@ -795,7 +794,14 @@ document.querySelectorAll('input[type="number"]').forEach(input => {
         button.addEventListener('click', function () {
             const input = this.parentElement.querySelector('.num-product');
             const currentValue = parseInt(input.value);
+			const maxValue = 3; 
             const newQuantity = currentValue + 1; // Increment value
+
+			if (newQuantity > maxValue) {
+                // Display the popup message
+                alert('Only 3 quantities are allowed for this product.');
+                return; // Prevent further execution
+            }
 
             updateQuantity(input, newQuantity); // Call update function
         });

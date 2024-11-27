@@ -1,89 +1,113 @@
 
-
-{% load static %}
+ {% load static %}
 {% load socialaccount %}
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <title>Lustrelux Dashboard</title>
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta property="og:title" content="">
-    <meta property="og:type" content="">
-    <meta property="og:url" content="">
-    <meta property="og:image" content="">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #3f3a3a; /* Dark background */
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-    
-    <link rel="shortcut icon" type="image/x-icon" href="{% static 'backend/assets/imgs/theme/favicon.svg' %}">
+        .login-container {
+            border: 3px solid black; /* Black border */
+            border-radius: 15px; /* Rounded corners */
+            overflow: hidden; /* Ensure content fits within rounded corners */
+            display: flex;
+            max-width: 900px; /* Limit maximum width */
+            width: 100%;
+            background-color: #4f4a4a; /* Background for container */
+        }
 
-    
-     <link href="{% static 'backend/assets/css/main.css' %}" rel="stylesheet" type="text/css">
-   
-     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+        .login-form {
+            padding: 30px;
+            flex: 1; /* Takes up equal space with the image */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-image {
+            flex: 1; /* Takes up equal space with the form */
+            max-width: 100%; /* Ensures image doesn't overflow */
+            object-fit: cover; /* Ensures image scales properly */
+        }
+
+        .btn-login {
+            background-color: #f5a9a9; /* Pink login button */
+            border: none;
+            color: #ffffff;
+            font-size: 1rem;
+            border-radius: 20px;
+            padding: 10px 20px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-login:hover {
+            background-color: #e68b8b;
+        }
+
+        .forgot-password, .signup-link {
+            color: #f5a9a9;
+            text-decoration: underline;
+        }
+
+        .forgot-password:hover, .signup-link:hover {
+            color: #ffffff;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column; /* Stack form and image vertically */
+            }
+
+            .login-image {
+                max-height: 300px; /* Limit height for smaller screens */
+            }
+        }
+    </style>
 </head>
-
 <body>
-    <main>
-        
-        <header class="main-header navbar bg-light py-3 shadow-sm">
-            <div class="container">
-                <a href="index-dark.html" class="brand-wrap">
-                    <img src="{% static 'backend/assets/imgs/theme/logo.jpg' %}" class="logo" alt="Lustrelux Dashboard" style="max-height: 50px;">
-                </a>
+    <div class="login-container">
+        <!-- Left Side: Login Form -->
+        <div class="login-form">
+            <h4 class="text-center mb-4">Login To Your Account</h4>
+            <form method="post" autocomplete="off">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-login btn-block">Login</button>
+            </form>
+            <div class="text-center mt-3">
+                <a href="{% url 'password_reset' %}" class="forgot-password">Forgot Password?</a>
             </div>
-        </header>
-
-       
-        <section class="content-main mt-5 mb-5">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-lg-5 col-md-7">
-                        <div class="card card-login shadow-sm">
-                            <div class="card-body">
-                               
-                                <h4 class="card-title mb-4 text-center">Login</h4>
-                                <form method="post" autocomplete="off">
-                                    {% csrf_token %}
-                                    {{ form.as_p }}
-                                    <button type="submit" class="btn btn-primary btn-block">Login</button>
-                                </form>
-                                
-                                
-                                <ul class="list-inline text-center mt-4">
-                                    <li class="list-inline-item">
-                                        <a href="{% provider_login_url 'google' %}" class="btn btn-google btn-block">
-                                            <i class="fab fa-google"></i> Login with Google
-                                        </a>
-                                    </li>
-                                </ul>
-
-                                
-                                <div class="form-group text-center mt-3">
-                                    <div class="custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" id="rememberMe">
-                                        <label class="form-check-label" for="rememberMe">Remember me</label>
-                                    </div>
-                                    <a class="d-block mt-2" href="{% url 'password_reset' %}">Forgot password?</a>
-                                    <a class="d-block mt-2" href="{% url 'change_password' %}">change password?</a>
-                                </div>
-                            </div>
-                            
-                            <div class="card-footer text-center">
-                                <p>Don't have an account? <a href="{% url 'accounts_register' %}">Register here</a></p>
-                            </div>
-                        </div>
-                    </div>
+            <div class="text-center mt-3">
+                <p>Or Login With</p>
+                <div class="social-login">
+                    <a href="{% provider_login_url 'google' %}" class="btn btn-google">
+                        <i class="fab fa-google"></i> Google
+                    </a>
                 </div>
             </div>
-        </section>
-    </main>
+            <div class="text-center mt-3">
+                <p>Don't have an account? <a href="{% url 'accounts_register' %}" class="signup-link">Sign Up</a></p>
+            </div>
+        </div>
 
-   
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <!-- Right Side: Image -->
+        <div>
+            <img src="{% static 'backend/assets/imgs/items/home.jpeg' %}" alt="Login Image" class="login-image">
+        </div>
+    </div>
 </body>
-</html>  
-
+</html>

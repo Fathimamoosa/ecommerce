@@ -231,7 +231,6 @@
 		<div class="container-menu-desktop trans-03">
 			<div class="wrap-menu-desktop">
 				<nav class="limiter-menu-desktop p-l-45">
-					
 					<!-- Logo desktop -->		
 					<a href="#" class="logo">
 						<img src="{% static 'frontend/asset/images/icons/Lustrelux.png' %}" alt="IMG-LOGO">
@@ -259,13 +258,11 @@
 							<li>
 								<a href="{% url 'contact' %}">Contact</a>
 							</li>
-							{% if user.is_authenticated %}
+							<!-- {% if user.is_authenticated %}
 							<li><a href="{% url 'accounts_login' %}">Logout</a></li>
 							{% else %}
 							<li><a href="{% url 'accounts_login' %}">Login</a></li>
-							<li><a href="{% url 'accounts_register' %}">Register</a></li>	
-							{% endif %}
-							<li><a href="{% url 'accounts_register' %}">Register</a></li>
+							{% endif %} -->
 						</ul>
 					</div>	
 
@@ -621,7 +618,7 @@
 		<div class="wrap-slick1 rs2-slick1">
 			<div class="slick1">
 				
-					<div class="item-slick1 bg-overlay1" style="background-image: url('static/frontend/asset/images/download.jpg');" data-thumb='static/frontend/asset/images/download.jpg' data-caption="Elegant Styles">	<div class="container h-full">
+					<div class="item-slick1 bg-overlay1" style="background-image: url('static/frontend/asset/images/down.jpg');" data-thumb='static/frontend/asset/images/down.jpg' data-caption="Elegant Styles">	<div class="container h-full">
 						<div class="flex-col-c-m h-full p-t-100 p-b-60 respon5">
 							<div class="layer-slick1 animated visible-false" data-appear="fadeInDown" data-delay="0">
 								<span class="ltext-202 txt-center cl0 respon2">
@@ -686,7 +683,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="item-slick1 bg-overlay1" style="background-image: url('static/frontend/asset/images/diamond-tumb1.jpg');" data-thumb='static/frontend/asset/images/diamond-tumb1.jpg' data-caption="Timeless Beauty">
+				<div class="item-slick1 bg-overlay1" style="background-image: url('static/frontend/asset/images/stone.jpg');" data-thumb='static/frontend/asset/images/stone.jpg' data-caption="Timeless Beauty">
 					<div class="container h-full">
 						<div class="flex-col-c-m h-full p-t-100 p-b-60 respon5">
 							<div class="layer-slick1 animated visible-false" data-appear="fadeInDown" data-delay="0">
@@ -997,7 +994,7 @@
 			
 			<div class="row isotope-grid">
 				{% for variant in variants %}
-				<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item {{ variant.product.category|lower }}s">
+				<div class="col-sm-6 col-md-3 col-lg-3 p-b-35 isotope-item {{ variant.product.category|lower }}s">
 					<!-- Block2 -->
 					<div class="block2">
 						<div class="block2-pic hov-img0">

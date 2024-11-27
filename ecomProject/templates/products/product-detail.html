@@ -55,7 +55,7 @@
 							Help & FAQs
 						</a>
 
-						<a href="#" class="flex-c-m trans-04 p-lr-25">
+						<a href="{% url 'profile' %}" class="flex-c-m trans-04 p-lr-25">
 							My Account
 						</a>
 
@@ -574,42 +574,47 @@
 	});
 	</script>
 	
-							<div class="flex-w flex-r-m p-b-10">
-								<div class="size-204 flex-w flex-m respon6-next">
-									<!-- <div class="wrap-num-product flex-w m-r-20 m-tb-10">
-										<div class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m">
-											<i class="fs-16 zmdi zmdi-minus"></i>
-										</div>
-
-										 <input class="mtext-104 cl3 txt-center num-product" type="number" name="num-product" value="1" id = "product-quantity"> -->
-										<!-- <input type = "hidden" value = "{{ variant.id }}" class = "varinat.id" name = " " id = "">
-										<input type = "hidden" value = "{{ variant.product_name }}" class = " product_name" nmar = "" id = "">
- 										<div class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m">
-											<i class="fs-16 zmdi zmdi-plus"></i>
-										</div>
-									</div> --> 
-									{% if variant.stock > 0 %}
-									{% if in_cart %}
-										<!-- If the item is already in the cart -->
-										<a href="#" class ="btn btn-success">
-											<span class="text">
-												Added to Cart
-											</span>
-											<i class="fas fa-check"></i>
-										</a>
-									{% else %}
-										<!-- If the item is in stock and not in the cart -->
-										<a href="{% url 'add_to_cart' variant.id %}" id="add-to-cart-{{ variant.id }}">
-											<button class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
-												Add to Cart
-											</button>
-											<i class="fas fa-shopping-cart"></i>
-										</a>
-									{% endif %}
-								{% else %}
-									<!-- If the item is out of stock -->
-									<div class="btn btn-secondary">Out of Stock</div>
-								{% endif %}
+	<div class="flex-w flex-r-m p-b-10">
+		<div class="size-204 flex-w flex-m respon6-next"> 
+			<!-- Check if the variant stock is greater than 0 -->
+			{% if variants %}
+				<form method="POST" action="{% url 'add_to_cart' product.id %}">
+					{% csrf_token %}
+					
+					<!-- Dropdown to choose a variant -->
+					<label for="variant">Choose a variant:</label>
+					<select name="variant" id="variant">
+						{% for variant in variants %}
+							<option value="{{ variant.id }}">
+								{{ variant.carat }} Carat - {{ variant.stock }} in stock
+							</option>
+						{% endfor %}
+					</select>
+	
+					<!-- Button to add to cart -->
+					{% if variant.stock > 0 %}
+						<button type="submit" class="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail">
+							Add to Cart
+						</button>
+					{% else %}
+						<!-- If out of stock, show "Out of Stock" button -->
+						<div class="btn btn-secondary">Out of Stock</div>
+					{% endif %}
+				</form>
+			{% endif %}
+	
+			<!-- Displaying if item is already in the cart -->
+			{% if in_cart %}
+				<a href="#" class="btn btn-success">
+					<span class="text">
+						Added to Cart
+					</span>
+					<i class="fas fa-check"></i>
+				</a>
+			{% endif %}
+		</div>
+	</div>
+	
 								
 
 								</div>

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test, login_required
-from .models import Products, ProductImage, Variant, Category, Brand, Review
+from .models import Products, ProductImage, Variant, Category, Brand, Review, Wishlist
 from .forms import ProductForm
 import base64
 import json
@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from cart.views import _cart_id
-from cart.models import CartItem
+from cart.models import CartItem, Cart
 from django.db.models import Min, Max
 from .forms import ReviewForm
 
@@ -182,12 +182,6 @@ def product_detail(request, pk):
     
     related_products = Products.objects.filter(category=product.category).exclude(id=product.id)[:5]
 
-    if variant.stock > 0:
-        # Logic to add product to cart or process order
-        variant.stock -= 1
-        variant.save()
-        print(variant.stock)
-        
 
     if request.method == 'POST':
         review_form = ReviewForm(request.POST)
@@ -220,36 +214,6 @@ def product_detail(request, pk):
     }
     return render(request, 'products/product-detail.html', context)
 
-        # Optional: You could check if a user is logged in and use the user ID
-        # if request.user.is_authenticated:
-        #     user = request.user
-        # else:
-        #     user = None  # or use a default name for anonymous users
-
-        # if rating and review_text:
-        #     Review.objects.create(
-        #         product=product,
-        #         user=user,
-        #         rating=rating,
-        #         review_text=review_text
-        #     )
-
-    #     return redirect('product_detail', pk=pk)  # Redirect after form submission to avoid resubmission
-
-    # # Get reviews for the product
-    # reviews = Review.objects.filter(product=product).order_by('-created_date')
-
-    # context = {
-    #     'product': product,
-    #     'variant': variant,
-    #     'variants': variants,
-    #     'images': images,
-    #     'related_products': related_products,
-    #     'in_cart': in_cart,
-    #     'reviews': reviews,  # Pass the reviews to the template
-    # }
-
-    # return render(request, 'products/product-detail.html', context)
 
 class DeleteImageView(View):
     def get(self, request, image_id):
@@ -285,16 +249,6 @@ def product_view(request, product_id):
         'product_images': product_images,
         'categories': categories
     })
-# def product_view(request, product_id):
-#     product = Products.objects.get(id=product_id)
-#     product_images = product.images.all() 
-#     categories = Category.all_objects.all()
-#     return render(request, 'products/product.html', {
-#         'product': product,
-#         'product_images': product_images,
-#         'categories': categories
-#     })
-    
 
 
 class ProductListView1(ListView):
@@ -327,7 +281,6 @@ class ProductListView(ListView):
         selected_categories = [int(id) for id in self.request.GET.getlist('category') if id.isdigit()]
         context['selected_categories'] = selected_categories
         context['sort'] = self.request.GET.get('sort', '') 
-        # Add price range to the context
         context['min_price'] = self.request.GET.get('min_price', '')
         context['max_price'] = self.request.GET.get('max_price', '') 
         context['query'] = self.request.GET.get('q', '') # Add current sort to context
@@ -373,56 +326,45 @@ class ProductListView(ListView):
 
         return queryset.distinct()
 
-# def search_products_view(request):
-#     query = request.GET.get("search-product")
-#     print("Search Query:", query) 
-#     products = []
+def add_to_wishlist(request, variant_id):
+    variant = get_object_or_404(Variant, id=variant_id)
+    wishlist_item, created = Wishlist.objects.get_or_create(user=request.user, variant=variant)
+    if created:
+        messages.success(request, "Variant added to wishlist")
+    else:
+        messages.info(request, "Variant is already in your wishlist")
+    return redirect('products:view_wishlist')
 
-#     if query:
-#         products = Products.objects.filter(
-#             Q(product_name__icontains=query) | Q(description__icontains=query)
-#         ).order_by("created_date")
-#     context = {
-#         "products" : products,
-#         "query" : query,
-#     }
-#     return render(request, 'products/search_products.html', context )
+@login_required
+def view_wishlist(request):
+    wishlist_items = Wishlist.objects.filter(user=request.user)
+    return render(request, 'products/wishlist.html', {'wishlist_items': wishlist_items})
+
+@login_required
+def remove_from_wishlist(request, variant_id):
+    variant = get_object_or_404(Variant, id=variant_id)
+    wishlist_item = Wishlist.objects.filter(user=request.user, variant=variant).first()
+    if wishlist_item:
+        wishlist_item.delete()
+        messages.success(request, "Variant remove from wishlist")
+    else:
+        messages.error(request, "Variant not found in your wishlist")
+    return redirect('products:view_wishlist')
+
+@login_required
+def add_to_cart_from_wishlist(request, variant_id):
+    variant =get_object_or_404(Variant, id =variant_id)
 
 
-# def product_list(request):
-#     products = Products.objects.all()
-
-#     # Filters
-#     category_id = request.GET.get('category')
-#     if category_id:
-#         products = products.filter(category_id=category_id)
-
-#     brand_id = request.GET.get('brand')
-#     if brand_id:
-#         products = products.filter(brand_id=brand_id)
-
-#     min_price = request.GET.get('min_price')
-#     max_price = request.GET.get('max_price')
-#     if min_price and max_price:
-#         products = products.filter(price__gte=min_price, price__lte=max_price)
-#     elif min_price:
-#         products = products.filter(price__gte=min_price)
-
-#     sort_order = request.GET.get('sort')
-#     if sort_order == 'az':
-#         products = products.order_by('title')
-#     elif sort_order == 'za':
-#         products = products.order_by('-title')
-#     elif sort_order == 'price_low':
-#         products = products.order_by('price')
-#     elif sort_order == 'price_high':
-#         products = products.order_by('-price')
-
-#     categories = Category.objects.all()
-#     brands = Brand.objects.all()
-
-#     return render(request, 'product_list.html', {
-#         'products': products,
-#         'categories': categories,
-#         'brands': brands,
-#     })
+    wishlist_item = Wishlist.objects.filter(user=request.user, variant=variant).first()
+    if wishlist_item:
+        cart, created = Cart.objects.get_or_create(cart_id=request.user.id)
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, variant=variant)
+        if created:
+            messages.success(request, "product moved to cart")
+        else:
+            messages.info(request, "product is already in your cart ")
+        wishlist_item.delete()
+    else:
+        messages.error(request, "Item not found in your wishlist.")
+    return redirect('products:view_wishlist')

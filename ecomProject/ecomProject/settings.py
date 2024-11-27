@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     'brand',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -179,7 +180,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static',]
 # EMAIL_PORT = 587
 # EMAIL_USE_TLS = True
 # EMAIL_HOST_USER = 'fathimamoosa760@gmail.com'
-# EMAIL_HOST_PASSWORD = 'xffdxbrkhzgntkmx'  
+# EMAIL_HOST_PASSWORD = 'wcpmufpueyhnqfnk'  
 # DEFAULT_FROM_EMAIL = 'Fathima moosa <fathimamoosa760@gmail.com>'
 
 
@@ -223,9 +224,15 @@ SITE_ID = 4
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
-
-SOCIALACCOUNT_LOGIN_ON_GET = True
-
+ACCOUNT_SIGNUP_REDIRECT_URL = '/'
 
 
+SOCIALACCOUNT_LOGIN_ON_GET = False
+
+
+SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'
+
+
+RAZORPAY_API_KEY = 'rzp_test_dvtXlG4wEE3EVQ',
+RAZORPAY_API_SECRET = 'Mwh5qfV2vps66p1mQO8vZa8k'
 

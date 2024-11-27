@@ -64,7 +64,6 @@ def _cart_id(request):
 def add_cart(request, variant_id):
     variant = Variant.objects.get(id=variant_id)
 
-
     if request.user.is_authenticated:
         cart, created = Cart.objects.get_or_create(cart_id=request.user.id)
         cart_item, created = CartItem.objects.get_or_create(

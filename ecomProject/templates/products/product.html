@@ -37,6 +37,87 @@
 	<!--===============================================================================================-->
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 	<style>
+		.layout-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.block2 {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+.block2:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.block2-pic {
+    position: relative;
+    overflow: hidden;
+}
+
+.block2-pic img {
+    width: 100%;
+    transition: transform 0.3s ease;
+}
+
+.block2:hover .block2-pic img {
+    transform: scale(1.1);
+}
+
+.quick-view-btn {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #000;
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.block2-pic:hover .quick-view-btn {
+    opacity: 1;
+}
+
+.product-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 1.1em;
+    margin: 10px 0;
+}
+
+.product-price {
+    color: #b12704;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.view-details-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background: #333;
+    color: #fff;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+.view-details-btn:hover {
+    background: #555;
+}
+
 		.page-border-container {
     border: 2px solid #e0e0e0; /* Light grey border */
     padding: 20px; /* Space between border and content */
@@ -338,7 +419,7 @@
 							Help & FAQs
 						</a>
 
-						<a href="#" class="flex-c-m trans-04 p-lr-25">
+						<a href="{% url 'profile' %}" class="flex-c-m trans-04 p-lr-25">
 							My Account
 						</a>
 
@@ -584,27 +665,24 @@
 		<div class="container">
 			<div class="flex-w flex-sb-m p-b-52">
 				<div class="flex-w flex-l-m filter-tope-group m-tb-10">
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 how-active1" data-filter="*">
+					<!-- Button for All Products -->
+					<button 
+						class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 {% if not selected_categories %}how-active1{% endif %}" 
+						onclick="filterCategory()">
 						All Products
 					</button>
-
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".rings">
-						Rings
-					</button>
-
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".necklaces">
-						Necklaces
-					</button>
-
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".bangles">
-						Bangles
-					</button>
-
-					<button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter=".earrings">
-						Earrings
-					</button>
-
+				
+					<!-- Dynamic Category Buttons -->
+					{% for category in categories %}
+						<button 
+							class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 {% if category.id in selected_categories %}how-active1{% endif %}" 
+							onclick="filterCategory({{ category.id }})">
+							{{ category.category_name }}
+						</button>
+					{% endfor %}
 				</div>
+				
+				
 
 				<div class="flex-w flex-c-m m-tb-10">
 					<div class="flex-c-m stext-106 cl6 size-104 bor4 pointer hov-btn3 trans-04 m-r-8 m-tb-4 js-show-filter">
@@ -643,7 +721,7 @@
 							</div>
 
 							<ul>
-								<li class="p-b-6">
+								<!-- <li class="p-b-6">
 									<a href="#" class="filter-link stext-106 trans-04">
 										Default
 									</a>
@@ -659,7 +737,7 @@
 									<a href="#" class="filter-link stext-106 trans-04">
 										Average rating
 									</a>
-								</li>
+								</li> -->
 
 								<ul>
 									<li class="p-b-6">
@@ -738,7 +816,7 @@
 							</form>
 						</div>
 
-						<div class="filter-col4 p-b-27">
+						<!-- <div class="filter-col4 p-b-27">
 							<div class="mtext-102 cl2 p-b-15">
 								Tags
 							</div>
@@ -764,13 +842,60 @@
 									Crafts
 								</a>
 							</div>
-						</div>
+						</div> -->
 					</div>
 				</div>
 			</div>
 <h2>Products</h2>
+<div class="layout-container">
+    <div class="row isotope-grid">
+        {% if variants %}
+        <h2>
+            {% if query %}
+                Search Results for "{{ query }}"
+            {% else %}
+                All Products
+            {% endif %}
+        </h2>
+        <ul>
+            {% for variant in variants %}
+            <div class="col-6 col-md-4 col-lg-3 p-b-35 isotope-item {{ variant.product.category.name|lower }}">
+                <div class="block2">
+                    <div class="block2-pic hov-img0">
+                        {% if variant.product.images.first %}
+                            <img src="{{ variant.product.images.first.image.url }}" alt="{{ variant.product.product_name }}">
+                        {% else %}
+                            <img src="{% static 'frontend/asset/images/default_image.jpg' %}" alt="Default Image">
+                        {% endif %}
+
+                        <a href="{% url 'product_detail' variant.id %}" class="quick-view-btn">Quick View</a>
+                    </div>
+                    <div class="block2-txt flex-w flex-t p-t-14">
+                        <div class="block2-txt-child1 flex-col-l">
+                            <a href="{% url 'product_detail' variant.id %}" class="product-name">
+                                {{ variant.product.product_name }}
+                            </a>
+                            <span class="product-price">Rs{{ variant.price }}</span>
+                            <a href="{% url 'product_detail' variant.id %}" class="view-details-btn">View Details</a>
+                        </div>
+                        <div class="block2-txt-child2 flex-r p-t-3">
+                            <a href="{% url 'products:add_to_wishlist' variant.id %}" class="add-to-wishlist">
+                                <img src="{% static 'frontend/asset/images/icons/icon-heart-01.png' %}" alt="Wishlist Icon">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No products found{% if query %} matching "{{ query }}"{% endif %}.</p>
+        {% endif %}
+    </div>
+</div>
+
 			
-	<div class="layout-container">
+	
 				<!-- Filter Sidebar
 				<aside class="filter-sidebar">
 					<h3>Filter by Categories</h3>
@@ -794,7 +919,7 @@
 					</div>
 				</aside> -->
 		
-				
+		<!-- <div class="layout-container">
 			<div class="row isotope-grid">
 				{% if variants %}
     			<h2>
@@ -806,17 +931,23 @@
     			</h2>
     			<ul>
 				{% for variant in variants %}
-				<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item watches">
+				<div class="col-6 col-md-4 col-lg-3 p-b-35 isotope-item {{ variant.product.category.name|lower }}">
 					<!-- Block2 -->
-					<div class="block2">
+					<!-- <div class="block2">
 						
 						<div class="block2-pic hov-img0">
-							{% if variant.product.images.all %}
+							{% if variant.product.images.first %}
+								<img src="{{ variant.product.images.first.image.url }}" alt="{{ variant.product.product_name }}">
+							{% else %}
+								<img src="{% static 'frontend/asset/images/default_image.jpg' %}" alt="Default Image">
+							{% endif %}
+
+							<!-- {% if variant.product.images.all %}
 							<img src="{{ variant.product.images.all.0.image.url }}" alt="{{ product.product_name }}">
 									{% else %}
 										<img src="{% static 'frontend/asset/images/default_image.jpg' %}" alt="Default Image">
-									{% endif %}
-									<a href="{% url 'product_detail' variant.id %}" class="quick-view-btn">Quick View</a>
+									{% endif %} -->
+									<!-- <a href="{% url 'product_detail' variant.id %}" class="quick-view-btn">Quick View</a>
 						</div>
 
 						<div class="block2-txt flex-w flex-t p-t-14">
@@ -828,10 +959,9 @@
 								<a href="{% url 'product_detail' variant.id %}" class="view-details-btn">View Details</a>
 							</div>
 							<div class="block2-txt-child2 flex-r p-t-3">
-								<a href="#" class="add-to-wishlist">
+								<a href="{% url 'products:add_to_wishlist' variant.id %}" class="add-to-wishlist">
 									<img src="{% static 'frontend/asset/images/icons/icon-heart-01.png' %}" alt="Wishlist Icon">
 								</a>
-								
 							</div>
 						</div>
 						
@@ -839,12 +969,13 @@
 				</div>
 				{% endfor %}
 				<!-- <p>No products found{% if query %} matching "{{ query }}"{% endif %}.</p> -->
-			</div>
+			<!-- </div>
 			</ul>
 			{% endif %}
 
-		</div>
+		</div> --> --> --> -->
 </section>
+<!-- <footer> -->
 <footer class="bg3 p-t-75 p-b-32">
 	<div class="container">
 		<div class="row">
@@ -1150,6 +1281,25 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 		</div>
 	</div>
 </div>
+<script>
+    function filterCategory(categoryId = '') {
+        const url = new URL(window.location.href);
+        const params = url.searchParams;
+
+        // Update 'category' parameter
+        if (categoryId) {
+            params.set('category', categoryId);
+        } else {
+            params.delete('category'); // Clear all categories
+        }
+
+        // Update the URL
+        url.search = params.toString();
+        window.location.href = url.toString();
+    }
+</script>
+
+
 <script>
 	document.addEventListener('DOMContentLoaded', function() {
 		let currentSlide = 0;

@@ -3,8 +3,9 @@
 <html lang="en">
 	<head>
 		<title>products</title>
-		<meta charset="UTF-8">
+    	<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Your Wishlist</title>
 	<!--===============================================================================================-->	
 		<link rel="icon" type="image/png" href="{% static 'frontend/asset/images/icons/favicon.png' %}"/>
 	<!--===============================================================================================-->
@@ -36,52 +37,7 @@
 		<link rel="stylesheet" type="text/css" href="{% static 'frontend/asset/css/main.css' %}">
 	<!--===============================================================================================-->
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-	    <style>/* Center the form on the page */
-            form {
-                max-width: 900px;
-                margin: auto;
-                background: #1f1c1c;
-                padding: 20px;
-                border-radius: 20px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            }
-            
-            /* Style form labels and inputs */
-            form label {
-                display: block;
-                font-weight: bold;
-                margin-bottom: 5px;
-            }
-            
-            form input[type="text"],
-            form input[type="number"],
-            form input[type="email"],
-            form input[type="tel"] {
-                width: 100%;
-                padding: 10px;
-                margin-bottom: 15px;
-                border: 1px solid #ddd;
-                border-radius: 5px;
-                background-color: #f5f7fa;
-            }
-            
-            /* Style the submit button */
-            form button {
-                width: 100%;
-                padding: 10px;
-                background-color: #17a2b8;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                font-size: 16px;
-                font-weight: bold;
-            }
-            
-            form button:hover {
-                background-color: #138496;
-            }
-            </style>
+	
 	</head>
 <body class="animsition">
 	
@@ -121,7 +77,7 @@
 					
 					<!-- Logo desktop -->		
 					<a href="#" class="logo">
-						<img src="images/icons/logo.jpg" alt="IMG-LOGO">
+						<img src="{% static 'frontend/asset/images/icons/Lustrelux.png' %}" alt="IMG-LOGO">
 					</a>
 
 					<!-- Menu desktop -->
@@ -130,7 +86,7 @@
 							<li>
 								<a href="{% url 'home' %}">Home</a>
 								<ul class="sub-menu">
-									<li><a href="{% url 'home' %}">Home</a></li>
+									<li><a href="{url 'home' }">Home</a></li>
 								</ul>
 							</li>
 
@@ -143,7 +99,7 @@
 							</li>
 
 
-							<li>
+							<li class="active-menu">
 								<a href="{% url 'about' %}">About</a>
 							</li>
 
@@ -217,7 +173,7 @@
 							Help & FAQs
 						</a>
 
-						<a href="{% url 'profile' %}" class="flex-c-m p-lr-10 trans-04">
+						<a href="#" class="flex-c-m p-lr-10 trans-04">
 							My Account
 						</a>
 
@@ -251,9 +207,9 @@
 					<a href="shoping-cart.html" class="label1 rs1" data-label1="hot">Features</a>
 				</li>
 
-				<li>
-					<a href="about.html">About</a>
-				</li>
+				<li class="active-menu">
+                    <a href="about.html">About</a>
+                </li>
 
 				<li>
 					<a href="contact.html">Contact</a>
@@ -281,7 +237,7 @@
 	<!-- Cart -->
 	<div class="wrap-header-cart js-panel-cart">
 		<div class="s-full js-hide-cart"></div>
-
+		{% for cart_item in cart_items %}
 		<div class="header-cart flex-col-l p-l-65 p-r-25">
 			<div class="header-cart-title flex-w flex-sb-m p-b-8">
 				<span class="mtext-103 cl2">
@@ -297,48 +253,16 @@
 				<ul class="header-cart-wrapitem w-full">
 					<li class="header-cart-item flex-w flex-t m-b-12">
 						<div class="header-cart-item-img">
-							<img src="images/item-cart-01.jpg" alt="IMG">
+							<img src="{{ cart_item.variant.product.images.first.image.url }}" alt="IMG">
 						</div>
 
 						<div class="header-cart-item-txt p-t-8">
-							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								White Shirt Pleat
+							<a href="{{ cart_item.variant.product.get_url }}" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
+								{{ cart_item.variant.product.product_name }}
 							</a>
 
 							<span class="header-cart-item-info">
-								1 x $19.00
-							</span>
-						</div>
-					</li>
-
-					<li class="header-cart-item flex-w flex-t m-b-12">
-						<div class="header-cart-item-img">
-							<img src="images/item-cart-02.jpg" alt="IMG">
-						</div>
-
-						<div class="header-cart-item-txt p-t-8">
-							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								Converse All Star
-							</a>
-
-							<span class="header-cart-item-info">
-								1 x $39.00
-							</span>
-						</div>
-					</li>
-
-					<li class="header-cart-item flex-w flex-t m-b-12">
-						<div class="header-cart-item-img">
-							<img src="images/item-cart-03.jpg" alt="IMG">
-						</div>
-
-						<div class="header-cart-item-txt p-t-8">
-							<a href="#" class="header-cart-item-name m-b-18 hov-cl1 trans-04">
-								Nixon Porter Leather
-							</a>
-
-							<span class="header-cart-item-info">
-								1 x $17.00
+								Rs {{ cart_item.variant.price }}
 							</span>
 						</div>
 					</li>
@@ -346,52 +270,62 @@
 				
 				<div class="w-full">
 					<div class="header-cart-total w-full p-tb-40">
-						Total: $75.00
+						Rs {{ cart_item.sub_total }}
 					</div>
 
 					<div class="header-cart-buttons flex-w w-full">
-						<a href="shoping-cart.html" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-r-8 m-b-10">
+						<a href="{% url 'cart_summary' %}" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-r-8 m-b-10">
 							View Cart
 						</a>
 
-						<a href="shoping-cart.html" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-b-10">
+						<a href="{% url 'cart_summary' %}" class="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-b-10">
 							Check Out
 						</a>
 					</div>
 				</div>
 			</div>
 		</div>
+		{% endfor %}
 	</div>
-    
-<!-- <h2>Edit Address</h2>
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Edit Address</button>
-</form> --> <div>
-    <h2>Edit Address</h2>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .wishlist-container { width: 80%; margin: auto; border: 1px solid #ddd; padding: 20px; }
+        .wishlist-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border: 1px dashed #ddd; padding: 10px; }
+        .wishlist-item img { width: 100px; height: 100px; object-fit: cover; }
+        .wishlist-item-details { flex-grow: 1; margin-left: 20px; }
+        .wishlist-item button { background-color: #000; color: #fff; padding: 5px 10px; border: none; cursor: pointer; }
+        .add-all { background-color: #000; color: #fff; padding: 10px 20px; border: none; cursor: pointer; display: block; margin: 20px auto; text-align: center; }
+    </style>
+</head>
+<br/><br/>
+<body>
+    <h1>Your Wishlist</h1>
+    <div class="wishlist-container">
+        {% for item in wishlist_items %}
+        <div class="wishlist-item">
+            <img src="{{ item.variant.product.images.first.image.url }}" alt="IMG-PRODUCT">
+            <div class="wishlist-item-details">
+                <h3>{{ item.variant.product.product_name }}</h3>
+                <p>Brand: {{ item.product.brand }}</p>
+                <p>Price: ₹{{ item.variant.price }}</p>
+            </div>
+            <a href="{% url 'products:remove_from_wishlist' item.variant.id %}"><i class="fa-solid fa-xmark"></i></a>
+      
+            <hr/><hr/><hr/><hr/><hr/><hr/>
 
-        
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }} 
-            <button type="submit">Save Changes</button>
-        </form>
-        <button type="button" onclick="setDefaultAddress()">Set as Default Address</button>
-
-        <button type="submit">Edit Address</button>
-        <a href="{% url 'profile' %}" class="btn btn-primary">Cancel</a>
-</div>
-
-<script>
-    function setDefaultAddress() {
-        alert("This address has been set as the default address."); // Example action
-    }
-</script>
-
-
-
-
+            <form method="post" action="{% url 'products:add_to_cart_from_wishlist' item.variant.id %}">
+                {% csrf_token %}
+                <button type="submit"><i class="fas fa-shopping-cart"></i></button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    <button class="add-all">Add All Items To Cart</button>
+    <script
+      src="https://kit.fontawesome.com/1d83a4a412.js"
+      crossorigin="anonymous"
+    ></script>
+<br/><br/><br/><br/><br/><br/><br/>
 <footer class="bg3 p-t-75 p-b-32">
     <div class="container">
         <div class="row">
@@ -861,3 +795,4 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 
 </body>
 </html>
+

@@ -60,3 +60,14 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Review for {self.product.product_name} by {self.user.username}"
+    
+class Wishlist(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    variant = models.ForeignKey('Variant', on_delete=models.CASCADE)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'variant')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.variant.name}"
