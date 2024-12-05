@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'brand',
     'rest_framework',
+    'coupons',
 ]
 
 MIDDLEWARE = [
@@ -233,6 +234,6 @@ SOCIALACCOUNT_LOGIN_ON_GET = False
 SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'
 
 
-RAZORPAY_API_KEY = 'rzp_test_dvtXlG4wEE3EVQ',
-RAZORPAY_API_SECRET = 'Mwh5qfV2vps66p1mQO8vZa8k'
+RAZORPAY_API_KEY = 'rzp_test_7CTaXaqM6vEWGm'
+RAZORPAY_API_SECRET = 'Hs0Uxa1b9J51u1xuTx5EzyfE'
 

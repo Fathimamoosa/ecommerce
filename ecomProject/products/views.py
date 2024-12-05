@@ -45,8 +45,6 @@ def add_product(request):
                         image.image.save(file_name, data, save=True)
 
         
-            
-            # variants_data = request.POST.getlist('variants')
             variants_data = json.loads(request.POST.get('variantsData'))
             
             print(variants_data)
@@ -67,47 +65,58 @@ def add_product(request):
     })
 
 
+
 @user_passes_test(custom_admin_required)
 def edit_product(request, pk):
     product = get_object_or_404(Products.all_objects, pk=pk)
-    existing_images = product.images.all() 
-    existing_variants = Variant.objects.all()
+    existing_images = product.images.all()
+    existing_variants = Variant.objects.filter(product=product)
 
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
-        
+
         if form.is_valid():
             product = form.save() 
-            image_files = request.FILES.getlist('image')  
-            
+            image_files = request.FILES.getlist('image')
+
+
             for image_file in image_files:
                 ProductImage.objects.create(products=product, image=image_file)
 
-            variants_data = request.POST.get('variantsData')
+
+            variants_data = request.POST.get('variantsData')  
             if variants_data:
-                variants = json.loads(variants_data)
-                existing_variant_ids = [variant.id for variant in existing_variants]
+                try:
+                    variants = json.loads(variants_data) 
+                    existing_variant_ids = [variant.id for variant in existing_variants]
 
-                for variant_data in variants:
-                    variant_id = variant_data.get('id')
-                    carat = variant_data['carat']
-                    price = variant_data['price']
-                    stock = variant_data['stock']
+                    for variant_data in variants:
+                        variant_id = variant_data.get('id')
+                        carat = variant_data.get('carat')
+                        price = variant_data.get('price')
+                        stock = variant_data.get('stock')
 
-                    if variant_id:  # Update existing variant
-                        variant = Variant.objects.get(id=variant_id)
-                        variant.carat = carat
-                        variant.price = price
-                        variant.stock = stock
-                        variant.save()
-                        existing_variant_ids.remove(variant.id)
-                    else:  # Add new variant
-                        Variant.objects.create(product=product, carat=carat, price=price, stock=stock)
+                        if variant_id:  
+                            variant = Variant.objects.get(id=variant_id, product=product)
+                            variant.carat = carat
+                            variant.price = price
+                            variant.stock = stock
+                            variant.save()
+                            existing_variant_ids.remove(variant.id)
+                        else:  
+                            Variant.objects.create(
+                                product=product,
+                                carat=carat,
+                                price=price,
+                                stock=stock
+                            )
 
-                # Delete variants not in the submitted data
-                Variant.objects.filter(id__in=existing_variant_ids).delete()
+                    Variant.objects.filter(id__in=existing_variant_ids).delete()
+                except json.JSONDecodeError:
+                    return JsonResponse({'error': 'Invalid JSON data for variants.'}, status=400)
 
             return redirect('products:product_list')
+
     else:
         form = ProductForm(instance=product)
 
@@ -116,7 +125,6 @@ def edit_product(request, pk):
         'existing_images': existing_images,
         'existing_variants': existing_variants,
     })
-
 
 
 @user_passes_test(custom_admin_required)
@@ -199,7 +207,7 @@ def product_detail(request, pk):
     else:
         review_form = ReviewForm()
 
-    # Fetch existing reviews
+   
     reviews = Review.objects.filter(product=product).order_by('-created_date')
 
     context = {
@@ -210,7 +218,7 @@ def product_detail(request, pk):
         'related_products': related_products,
         'in_cart': in_cart,
         'reviews': reviews,
-        'review_form': review_form,  # Pass the form to the template
+        'review_form': review_form,  
     }
     return render(request, 'products/product-detail.html', context)
 
@@ -235,14 +243,13 @@ def product_view(request, product_id):
     product = Products.objects.get(id=product_id)
     categories = Category.all_objects.all()
 
-    # Sorting for product images
-    sort_by = request.GET.get('sort')  # Get the sorting parameter
+    sort_by = request.GET.get('sort') 
     product_images = product.images.all()
 
     if sort_by == 'a_to_z':
-        product_images = product_images.order_by('id')  # Adjust 'id' to a relevant field
+        product_images = product_images.order_by('id') 
     elif sort_by == 'z_to_a':
-        product_images = product_images.order_by('-id')  # Adjust '-id' to a relevant field
+        product_images = product_images.order_by('-id')
 
     return render(request, 'products/product.html', {
         'product': product,
@@ -283,27 +290,26 @@ class ProductListView(ListView):
         context['sort'] = self.request.GET.get('sort', '') 
         context['min_price'] = self.request.GET.get('min_price', '')
         context['max_price'] = self.request.GET.get('max_price', '') 
-        context['query'] = self.request.GET.get('q', '') # Add current sort to context
+        context['query'] = self.request.GET.get('q', '') 
         return context
 
     def get_queryset(self):
 
-        # queryset = Products.objects.filter(is_deleted=False, is_available=True)
         queryset = Variant.objects.filter(product__category__is_deleted=False)
         categories = self.request.GET.getlist('category')
         sort = self.request.GET.get('sort')
         query = self.request.GET.get('q')
 
-        # Filter by category
+       
         if categories:
             queryset = queryset.filter(product__category_id__in=categories)
 
-        # Sort by the requested order
+
         sort_by = self.request.GET.get('sort')
         if sort_by == 'a_to_z':
-            queryset = queryset.order_by('product__product_name')  # Use correct field
+            queryset = queryset.order_by('product__product_name')  
         elif sort_by == 'z_to_a':
-            queryset = queryset.order_by('-product__product_name')  # Use correct field
+            queryset = queryset.order_by('-product__product_name')  
         if query:
             queryset = queryset.filter(
                 product__product_name__icontains=query
@@ -321,8 +327,7 @@ class ProductListView(ListView):
             queryset = queryset.order_by('price')
         elif sort == 'price_high_to_low':
             queryset = queryset.order_by('-price')
-        # elif sort == 'new_arrival':
-        #     queryset = queryset.order_by('-product__created_date')
+        
 
         return queryset.distinct()
 

@@ -412,13 +412,14 @@
 					{% if user.is_authenticated %}
 					
 					
-						<a href="{% url 'accounts_login' %}" class="stext-102 cl2 hov-cl1 trans-04">
-							logout
-						</a>
+					<form method="POST" action="{% url 'accounts_logout' %}">
+						{% csrf_token %}
+						<button type="submit">Logout</button>
+					</form>
 					
 					{% else  %}
 					
-						<a href="{% url 'home' %}" class="stext-102 cl2 hov-cl1 trans-04">
+						<a href="{% url 'accounts_login' %}" class="stext-102 cl2 hov-cl1 trans-04">
 							login
 						</a>
 					

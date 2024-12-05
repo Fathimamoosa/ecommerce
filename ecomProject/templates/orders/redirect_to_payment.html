@@ -1,0 +1,7 @@
+<form id="redirectForm" action="{% url 'payments:payment' %}" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="order_id" value="{{ order_id }}">
+</form>
+<script>
+    document.getElementById("redirectForm").submit();
+</script>

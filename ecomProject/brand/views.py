@@ -61,3 +61,4 @@ def restore_brand(request, pk):
         brand.save()
         return redirect('brand_list')
     return render(request, 'custom_admin/restore_confirmation.html', {'brand': brand})
+

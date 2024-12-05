@@ -1,3 +1,5 @@
+
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -338,42 +340,6 @@
 						{% endif %}
 						<a href="{% url 'add_address' %}" class="add-address-btn">Add New Address</a>
 						
-					    <!-- <br/> <br/>
-						<h6>Or Enter a New Address</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label>First Name</label>
-                                <input type="text" class="form-control" name="fname" placeholder="Enter first name">
-                            </div>
-                            <div class="col-md-6">
-                                <label>Last Name</label>
-                                <input type="text" class="form-control" name="lname" placeholder="Enter last name">
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <label>Email</label>
-                                <input type="email" class="form-control" name="email" placeholder="Enter email">
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <label>Phone</label>
-                                <input type="text" class="form-control" name="phone" placeholder="Enter phone">
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <label>Address</label>
-                                <textarea class="form-control" name="address" placeholder="Enter address"></textarea>
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <label>City</label>
-                                <input type="text" class="form-control" name="city" placeholder="Enter city">
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <label>State</label>
-                                <input type="text" class="form-control" name="state" placeholder="Enter state">
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <label>Pincode</label>
-                                <input type="text" class="form-control" name="pincode" placeholder="Enter pincode">
-                            </div>
-                    	 </div> -->
                         <hr> 
 					</div>
 				</div>
@@ -409,22 +375,60 @@
 								</tr>
 								{% endfor %}
 							</tbody>
-							
 						</table>
 						<br/>
 						<h6>Grand total
 							<span class="float-end"> Rs {{ total_price }}</span>
 						</h6>
 						<br/>
-						<h6>Payment Method</h6>
-                        <select class="form-control" name="payment_method" required>
+							{% csrf_token %}
+							<h6>Payment Method</h6>
+							{% if total_price <= 50000 or discounted_total <= 50000 %}
+							<div class="m-3">
+								<input type="radio" name="payment_method" id="cash_on_delivery" value="cash_on_delivery" required>
+								<label for="cash_on_delivery">Cash On Delivery</label><br>
+							</div>
+							{% endif %}
+							<div class="m-3">
+								<input type="radio" name="payment_method" id="online" value="online" required>
+								<label for="online">Online</label><br>
+							</div>
+							{% if wallet.balance >= 0 %}
+							<div class="m-3">
+								<input type="radio" name="payment_method" id="wallet" value="wallet" required>
+								<label for="wallet">Wallet ( Balance : {{ wallet.balance }})</label><br>
+							</div>
+							{% endif %}
+							<button type="submit" class="btn btn-primary" id="continue-btn">Continue</button>
+						</form>
+						
+						<!-- <h6>Payment Method</h6>
+						{% if total_price <= 50000 or discounted_total <= 50000 %}
+                        <div class="m-3">
+                            <input type="radio" name="payment_method" id="cash_on_delivery" value="cash_on_delivery" required>
+                            <label for="cash_on_delivery">Cash On Delivery</label><br>
+                        </div>
+                        {% endif %}
+                        <div class="m-3">
+                            <input type="radio" name="payment_method" id="online" value="online" required>
+                            <label for="online">Online</label><br>
+                        </div>
+                        {% if wallet.balance >= 0 %}
+
+                        <div class="m-3">
+                            <input type="radio" name="payment_method" id="wallet" value="wallet" required>
+                            <label for="wallet">Wallet ( Balance : {{wallet.balance}})</label><br>
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary">Continue</button> -->
+                        <!-- <select class="form-control" name="payment_method" required>
                             <option value="">Select Payment Method</option>
                             <option value="Cash On Delivery">Cash On Delivery</option>
                             <option value="Online Payment">Online Payment</option>
                         </select>
                         <br>
 						<button type="submit" class="btn btn-primary">Place Order</button>
-						<button type="button" class="btn btn-primary paywithRazorpay w-100 mt-2" id="rzp-button">Pay with Razorpay</button>
+						 -->
 						{% else %}
 						<h4>Your cart is empty</h4>
 						{% endif %}
@@ -435,11 +439,158 @@
 	</form>
 </div>
 
-
-
-
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+    // Function to handle frontend and backend update
+    const updateQuantity = (input, newQuantity) => {
+        const cartId = input.dataset.cartId; // Get the cart item ID from a data attribute
 		
+        // Update the frontend
+        input.value = newQuantity;
+        // Make AJAX request to update the backend
+        fetch(`cart/${cartId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value, // CSRF token
+            },
+            body: JSON.stringify({ quantity: newQuantity })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Quantity updated successfully on the backend');
+                    // Optionally update total prices in the DOM
+                    document.querySelector('#cart-total').textContent = data.cart_total;
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    };
 
+    document.querySelectorAll('.btn-num-product-up').forEach(button => {
+        button.addEventListener('click', function () {
+            const input = this.parentElement.querySelector('.num-product');
+            const currentValue = parseInt(input.value);
+            const newQuantity = currentValue + 1; // Increment value
+
+            updateQuantity(input, newQuantity); // Call update function
+        });
+    });
+
+
+    document.querySelectorAll('.btn-num-product-down').forEach(button => {
+        button.addEventListener('click', function () {
+            const input = this.parentElement.querySelector('.num-product');
+            const currentValue = parseInt(input.value);
+            const minValue = parseInt(input.min);
+            const newQuantity = currentValue > minValue ? currentValue - 1 : currentValue; // Decrement value
+
+            if (newQuantity !== currentValue) {
+                updateQuantity(input, newQuantity); // Call update function
+            }
+        });
+    });
+});
+
+</script> 
+<script>function confirmRemoval(event, url) {
+    if (confirm("Are you sure you want to remove this item from the cart?")) {
+        window.location.href = url;
+    } else {
+        event.preventDefault();
+    }}
+	// Delete Item From Cart
+	$(document).on('click', '.delete-product', function(e){
+    e.preventDefault();
+    // grab the product id
+    //var productid = $(this).data('index');
+
+    $.ajax({
+    type: 'POST',
+    url: '{% url "cart_summary" %}',
+    data: {
+      variant_id: $(this).data('index'),
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+      action: 'post'
+    },
+    success: function(json){
+        //console.log(json)
+        //document.getElementById("cart_quantity").textContent = json.qty
+        location.reload();
+    },
+
+    error: function(xhr, errmsg, err){
+
+    }
+
+
+    });
+
+})
+</script>
+<script> 
+	document.addEventListener('DOMContentLoaded', function() {
+		let currentSlide = 0;
+		const slides = document.querySelectorAll('.item-slick1');
+		const dots = document.querySelector('.wrap-slick1-dots');
+		
+		// Create dots
+		slides.forEach((_, index) => {
+			const dot = document.createElement('div');
+			dot.className = `slick1-dot ${index === 0 ? 'active' : ''}`;
+			dot.addEventListener('click', () => goToSlide(index));
+			dots.appendChild(dot);
+		});
+
+		// Show slide
+		function showSlide(index) {
+			// Hide all slides
+			slides.forEach(slide => {
+				// slide.style.display = 'none';
+				slide.querySelectorAll('.animated').forEach(el => {
+					el.classList.remove(el.dataset.appear);
+				});
+			});
+
+			// Show current slide
+			slides[index].style.display = 'block';
+			
+			// Trigger animations
+			setTimeout(() => {
+				slides[index].querySelectorAll('.animated').forEach((el, i) => {
+					setTimeout(() => {
+						el.classList.add(el.dataset.appear);
+					}, el.dataset.delay);
+				});
+			}, 100);
+
+			// Update dots
+			document.querySelectorAll('.slick1-dot').forEach((dot, i) => {
+				dot.classList.toggle('active', i === index);
+			});
+		}
+
+		// Go to specific slide
+		function goToSlide(index) {
+			currentSlide = index;
+			showSlide(currentSlide);
+		}
+
+		// Next slide
+		function nextSlide() {
+			currentSlide = (currentSlide + 1) % slides.length;
+			showSlide(currentSlide);
+		}
+
+		// Start autoplay
+		setInterval(nextSlide, 5000);
+
+		// Show initial slide
+		showSlide(0);
+	});
+</script>
 	<!-- Footer -->
 	<footer class="bg3 p-t-75 p-b-32">
 		<div class="container">
@@ -593,68 +744,6 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 		</span>
 	</div>
 
-	<script>
-	
-		document.addEventListener('DOMContentLoaded', function() {
-			let currentSlide = 0;
-			const slides = document.querySelectorAll('.item-slick1');
-			const dots = document.querySelector('.wrap-slick1-dots');
-			
-			// Create dots
-			slides.forEach((_, index) => {
-				const dot = document.createElement('div');
-				dot.className = `slick1-dot ${index === 0 ? 'active' : ''}`;
-				dot.addEventListener('click', () => goToSlide(index));
-				dots.appendChild(dot);
-			});
-	
-			// Show slide
-			function showSlide(index) {
-				// Hide all slides
-				slides.forEach(slide => {
-					// slide.style.display = 'none';
-					slide.querySelectorAll('.animated').forEach(el => {
-						el.classList.remove(el.dataset.appear);
-					});
-				});
-	
-				// Show current slide
-				slides[index].style.display = 'block';
-				
-				// Trigger animations
-				setTimeout(() => {
-					slides[index].querySelectorAll('.animated').forEach((el, i) => {
-						setTimeout(() => {
-							el.classList.add(el.dataset.appear);
-						}, el.dataset.delay);
-					});
-				}, 100);
-	
-				// Update dots
-				document.querySelectorAll('.slick1-dot').forEach((dot, i) => {
-					dot.classList.toggle('active', i === index);
-				});
-			}
-	
-			// Go to specific slide
-			function goToSlide(index) {
-				currentSlide = index;
-				showSlide(currentSlide);
-			}
-	
-			// Next slide
-			function nextSlide() {
-				currentSlide = (currentSlide + 1) % slides.length;
-				showSlide(currentSlide);
-			}
-	
-			// Start autoplay
-			setInterval(nextSlide, 5000);
-	
-			// Show initial slide
-			showSlide(0);
-		});
-	</script>
 	<!-- <script>
 	function updateQuantity(itemId, newQuantity) {
     fetch(`/cart/update_quantity/${itemId}/`, {
@@ -703,151 +792,11 @@ document.querySelectorAll('input[type="number"]').forEach(input => {
 });
 </script> -->
 
-<script>
-	document.addEventListener('DOMContentLoaded', () => {
-    // Function to handle frontend and backend update
-    const updateQuantity = (input, newQuantity) => {
-        const cartId = input.dataset.cartId; // Get the cart item ID from a data attribute
-		
-        // Update the frontend
-        input.value = newQuantity;
-        // Make AJAX request to update the backend
-        fetch(`cart/${cartId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value, // CSRF token
-            },
-            body: JSON.stringify({ quantity: newQuantity })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log('Quantity updated successfully on the backend');
-                    // Optionally update total prices in the DOM
-                    document.querySelector('#cart-total').textContent = data.cart_total;
-                } else {
-                    alert(data.error);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    };
 
-    // Add event listeners to increment buttons
-    document.querySelectorAll('.btn-num-product-up').forEach(button => {
-        button.addEventListener('click', function () {
-            const input = this.parentElement.querySelector('.num-product');
-            const currentValue = parseInt(input.value);
-            const newQuantity = currentValue + 1; // Increment value
-
-            updateQuantity(input, newQuantity); // Call update function
-        });
-    });
-
-    // Add event listeners to decrement buttons
-    document.querySelectorAll('.btn-num-product-down').forEach(button => {
-        button.addEventListener('click', function () {
-            const input = this.parentElement.querySelector('.num-product');
-            const currentValue = parseInt(input.value);
-            const minValue = parseInt(input.min);
-            const newQuantity = currentValue > minValue ? currentValue - 1 : currentValue; // Decrement value
-
-            if (newQuantity !== currentValue) {
-                updateQuantity(input, newQuantity); // Call update function
-            }
-        });
-    });
-});
-
-</script> 
-<script>function confirmRemoval(event, url) {
-    if (confirm("Are you sure you want to remove this item from the cart?")) {
-        window.location.href = url;
-    } else {
-        event.preventDefault();
-    }}
-	// Delete Item From Cart
-	$(document).on('click', '.delete-product', function(e){
-    e.preventDefault();
-    // grab the product id
-    //var productid = $(this).data('index');
-
-    $.ajax({
-    type: 'POST',
-    url: '{% url "cart_summary" %}',
-    data: {
-      variant_id: $(this).data('index'),
-      csrfmiddlewaretoken: '{{ csrf_token }}',
-      action: 'post'
-    },
-    success: function(json){
-        //console.log(json)
-        //document.getElementById("cart_quantity").textContent = json.qty
-        location.reload();
-    },
-
-    error: function(xhr, errmsg, err){
-
-    }
+   
 
 
-    });
 
-})
-<script>
-    document.getElementById('rzp-button').onclick = function(e) {
-        e.preventDefault();
-
-        // Razorpay options
-        var options = {
-            "key": "{{ razorpay_key }}", // Add this to your context from your Django view
-            "amount": "{{ total_price|floatformat:2|floatformat }}00", // Convert total price to paisa
-            "currency": "INR",
-            "name": "Your Store Name",
-            "description": "Order Payment",
-            "image": "/path-to-your-logo.png", // Optional: Add your store logo
-            "order_id": "{{ razorpay_order_id }}", // Pass this from the server
-            "handler": function (response) {
-                // Handle payment success
-                alert("Payment successful! Payment ID: " + response.razorpay_payment_id);
-
-                // Send payment details to your server for verification
-                fetch('/payment-callback/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                    body: JSON.stringify({
-                        razorpay_order_id: response.razorpay_order_id,
-                        razorpay_payment_id: response.razorpay_payment_id,
-                        razorpay_signature: response.razorpay_signature,
-                    })
-                }).then(response => {
-                    if (response.ok) {
-                        window.location.href = "/success/";
-                    } else {
-                        alert("Payment verification failed!");
-                    }
-                });
-            },
-            "prefill": {
-                "name": "{{ user.username }}",
-                "email": "{{ user.email }}",
-                "contact": "1234567890" // Optional: Add user's phone number if available
-            },
-            "theme": {
-                "color": "#F37254"
-            }
-        };
-
-        var rzp = new Razorpay(options);
-        rzp.open();
-    };
-</script>
-
-
-</script>
 	<script src="{% static 'frontend/asset/checkout.js' %}"></script>
 <!--===============================================================================================-->	
 	<script src="{% static 'frontend/asset/vendor/jquery/jquery-3.2.1.min.js' %}"></script>

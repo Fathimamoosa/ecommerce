@@ -1,0 +1,77 @@
+{% extends 'custom_admin/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Coupons</h2>
+            <p><h1>Available Coupons</h1></p>
+        </div>
+        <div>
+            <a href="{% url 'admin_coupon_add' %}" class="btn btn-primary btn-sm rounded">Create new</a>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+               
+                <div class="col-md-12"> <!-- Changed to full width for better display -->
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <!-- Optional: If you want checkboxes for bulk actions -->
+                                    <th class="text-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="select-all"/>
+                                        </div>
+                                    </th>
+                                    <th> CouponCode</th>
+                                    <th>Discount (%)</th>
+                                    <th>Valid From</th>
+                                    <th>Valid Until</th>
+                                    <th>Minimum Order Amount</th>
+                                    <th>Maximum Discount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for coupon in coupons %}
+                                <tr>
+                                    <td class="text-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="coupon_ids" value="{{ coupon.id }}">
+                                        </div>
+                                    </td>
+                                    <td>{{ coupon.code }}</td>
+                                    <td>{{ coupon.discount }}%</td>
+                                    <td>{{ coupon.valid_from|date:"Y-m-d" }}</td>
+                                    <td>{{ coupon.valid_until|date:"Y-m-d" }}</td>
+                                    <td>${{ coupon.minimum_order_amount }}</td>
+                                    <td>${{ coupon.maximum_discount_limit }}</td>
+                                    <td>
+                                        <!-- Optional: Additional actions like Edit/Delete -->
+                                        <a href="{% url 'admin_coupon_edit' coupon.id %}" class="btn btn-dark btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">No coupons available.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Optional: Bulk Actions -->
+                    
+                </div>
+            </div> <!-- .row // -->
+        </div> <!-- card body .// -->
+    </div> <!-- card .// -->
+</section> <!-- content-main end// -->
+{% endblock %}

@@ -60,7 +60,6 @@ class OrderItem(models.Model):
         return f"{self.variant.product.name} (x{self.quantity})"
 
 
-
 class Payment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     payment_id = models.CharField(max_length=50, null=True)
@@ -74,4 +73,7 @@ class Payment(models.Model):
         return self.payment_id
 
 
+class Wallet(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
 

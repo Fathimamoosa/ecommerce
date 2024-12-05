@@ -1,0 +1,62 @@
+{% extends 'custom_admin/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">{{ action }} Coupon</h1>
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Coupon form -->
+            <form method="post" id="couponForm">
+                {% csrf_token %}
+                
+                <!-- Render fields manually -->
+                <div class="form-group">
+                    {{ form.code.label_tag }}
+                    {{ form.code }}
+                </div>
+                <div class="form-group">
+                    {{ form.discount.label_tag }}
+                    {{ form.discount }}
+                </div>
+                <div class="form-group">
+                    {{ form.valid_from.label_tag }}
+                    {{ form.valid_from }}
+                </div>
+                <div class="form-group">
+                    {{ form.valid_until.label_tag }}
+                    {{ form.valid_until }}
+                </div>
+                <div class="form-group">
+                    {{ form.active.label_tag }}
+                    {{ form.active }}
+                </div>
+                <div class="form-group">
+                    {{ form.minimum_order_amount.label_tag }}
+                    {{ form.minimum_order_amount }}
+                </div>
+                <div class="form-group">
+                    {{ form.maximum_discount_limit.label_tag }}
+                    {{ form.maximum_discount_limit }}
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-success mt-3">{{ action }} Coupon</button>
+                <a href="{% url 'admin_coupon_list' %}" class="btn btn-secondary mt-3">Back to List</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Include JS libraries -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+    // Initialize Flatpickr for the date fields
+    document.addEventListener('DOMContentLoaded', function () {
+        flatpickr("#id_valid_from", { dateFormat: "Y-m-d" });
+        flatpickr("#id_valid_until", { dateFormat: "Y-m-d" });
+    });
+</script>
+{% endblock %}
+

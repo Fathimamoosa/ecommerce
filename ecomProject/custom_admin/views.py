@@ -35,27 +35,6 @@ class LoginView(View):
                 print("Authentication failed.")
         return render(request, 'custom_admin/login.html', {'form': form})
 
-    # def post(self, request):
-    #     form = CustomLoginForm(request, data=request.POST)
-    #     if form.is_valid():
-            
-    #         email = form.cleaned_data.get('email') 
-    #         password = form.cleaned_data.get('password')
-    #         user = authenticate(request, email=email, password=password)
-    #         print(f"Authenticated user: {user}")
-    #         if user:
-    #             if user.is_staff and user.is_superuser:
-    #                 login(request, user)
-    #                 print('00')
-    #                 return redirect('dashboard')  
-    #             else:
-    #                 messages.error(request, "You do not have permission to access this site.")
-    #         else:
-    #             messages.error(request, "Invalid email or password.")
-    #     else:
-    #         messages.error(request, "Form validation failed. Please try again.")
-    #         print('67')
-    #     return render(request, 'custom_admin/login.html', {'form': form})
 
 def dashboard(request):
     return render(request, 'custom_admin/dashboard.html')

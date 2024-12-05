@@ -5,7 +5,7 @@ from products.views import product_detail
 from .views import CustomPasswordResetView, edit_profile,  UserAddressesView, AddAddressView, EditAddressView, DeleteAddressView, set_default_address
 from . import views
 from products.views import ProductListView
-
+from coupons.views import admin_coupon_list, admin_coupon_add, admin_coupon_edit 
 
 
 urlpatterns = [
@@ -33,7 +33,10 @@ urlpatterns = [
     path('add_address/', views.AddAddressView.as_view(), name='add_address'),
     path('edit_address/<int:pk>/', views.EditAddressView.as_view(), name='edit_address'),
     path('delete_address/<int:pk>/', views.DeleteAddressView.as_view(), name='delete_address'),
-     path('set-default-address/<int:address_id>/', views.set_default_address, name='set_default_address'),
+    path('set-default-address/<int:address_id>/', views.set_default_address, name='set_default_address'),
+    path('coupons/', admin_coupon_list, name='admin_coupon_list'),
+    path('coupons/add/', admin_coupon_add, name='admin_coupon_add'),
+    path('coupons/edit/<int:pk>/', admin_coupon_edit, name='admin_coupon_edit'),
 ]
 
  

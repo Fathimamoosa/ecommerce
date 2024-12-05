@@ -2,6 +2,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+	<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 	<title>Shoping Cart</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -305,11 +309,9 @@
 			</span>
 		</div>
 	</div>
-		
 
-	<!-- Shoping Cart -->
+
 	<form class="bg0 p-t-75 p-b-85">
-		
 		<div class="container">
 			{% if cart_items %}
 			<div class="row">
@@ -319,16 +321,15 @@
 							<table class="table-shopping-cart">
 								<tr class="table_head">
 									<th class="column-1">Product</th>
-									<th class="column-2"></th>
+									<th class="column-2">Name</th>
 									<th class="column-3">Price</th>
 									<th class="column-4">Quantity</th>
 									<th class="column-5">Total</th>
-									<th class="column-6">Update</th>
-
+									<th class="column-6">Actions</th>
 								</tr>
 								
 								{% for cart_item in cart_items %}
-								<tr class="table_row">
+								<tr class="table_row" data-cart-item-id="{{ cart_item.id }}">
 									<td class="column-1">
 										<div class="how-itemcart1">
 											<img src="{{ cart_item.variant.product.images.first.image.url }}" alt="IMG">
@@ -347,54 +348,60 @@
 												<i class="fs-16 zmdi zmdi-plus"></i>
 											</a>
 										</div>
-										
-										<td>
-											<a href="{% url 'cart_delete' cart_item.variant.id %}" class="btn btn-danger delete-product">Remove</a>
-										</td>
+
    										
 
 									</td>
+									  
 									<td class="column-5" id="item-total-price-{{ cart_item.id }}">Rs {{ cart_item.sub_total }}</td>
 									
-
-
-									<p>Total Cart Price: <span id="cart-total-price">Rs {{ total_price }} </span></p>
- 
-									<td id="item-total-price-{{ cart_item.id }}">
-										
+									<td>
+										<button 
+											class="btn btn-danger delete-product" 
+											data-cart-item-id="{{ cart_item.id }}" 
+											data-variant-id="{{ cart_item.variant.id }}">
+											Remove
+										</button>
 									</td>
-									
-
 								</tr>
 								{% endfor %}
-							
-								
-								
 							</table>
-							
 						</div>
 						
-	
-						<div class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm">
-							<div class="flex-w flex-m m-r-20 m-tb-5">
-								<input class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5" type="text" name="coupon" placeholder="Coupon Code">
-									
-								<div class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5">
-									Apply coupon
+						<p>Total Price Before Discount: Rs {{ total_price|floatformat:2 }}</p>
+
+						{% if coupon_code %}
+							<p>Coupon Applied: {{ coupon_code }}</p>
+							<p>Discount: Rs {{ discount|floatformat:2 }}</p>
+							<p>Total Price After Discount: Rs {{ total_price_after_discount|floatformat:2 }}</p>
+							<form method="POST" action="{% url 'cart_summary' %}">
+								{% csrf_token %}
+								<input type="hidden" name="remove_coupon" value="1">
+								<button type="submit" class="btn btn-danger">Remove Coupon</button>
+							</form>
+						{% else %}
+							<form method="POST" action="{% url 'cart_summary' %}">
+								{% csrf_token %}
+								<div class="flex-w flex-m m-r-20 m-tb-5">
+									<input 
+										class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5" 
+										type="text" 
+										name="coupon" 
+										placeholder="Enter Coupon Code">
+									<input type="hidden" name="apply_coupon" value="1">
+									<button 
+										type="submit" 
+										class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5">
+										Apply Coupon
+									</button>
 								</div>
-							</div>
-	
-							<button class="flex-c-m stext-101 cl2 size-119 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-10">
-								Update Cart
-							</button>
-						</div>
+							</form>
+						{% endif %}
+						
+						
 					</div>
 				</div>
-			</div>
-		
-		
-		</form>
-	
+
 				<div class="col-sm-10 col-lg-7 col-xl-5 m-lr-auto m-b-50">
 					<div class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm">
 						<h4 class="mtext-109 cl2 p-b-30">
@@ -492,11 +499,9 @@
 			</div>
 			</li>{% endif %}
 		</div>
-		
-	</form>
-		
-	
-		
+		</div>	
+		</div>
+	</form> 		
 
 	<!-- Footer -->
 	<footer class="bg3 p-t-75 p-b-32">
@@ -642,21 +647,167 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 			</div>
 		</div>
 	</footer>
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+		// Function to handle frontend and backend update
+		const updateQuantity = (input, newQuantity) => {
+			const cartId = input.dataset.cartId; // Get the cart item ID from a data attribute
+			
+			// Update the frontend
+			input.value = newQuantity;
+			// Make AJAX request to update the backend
+			fetch(`cart/${cartId}/`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value, // CSRF token
+				},
+				body: JSON.stringify({ quantity: newQuantity })
+			})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						console.log('Quantity updated successfully on the backend');
+						// Optionally update total prices in the DOM
+						document.querySelector('#cart-total').textContent = data.cart_total;
+					} else {
+						alert(data.error);
+					}
+				})
+				.catch(error => console.error('Error:', error));
+		};
+	
+		// Add event listeners to increment buttons
+		document.querySelectorAll('.btn-num-product-up').forEach(button => {
+			button.addEventListener('click', function () {
+				const input = this.parentElement.querySelector('.num-product');
+				const currentValue = parseInt(input.value);
+				const maxValue = 3; 
+				const newQuantity = currentValue + 1; // Increment value
+	
+				if (newQuantity > maxValue) {
+					// Display the popup message
+					alert('Only 3 quantities are allowed for this product.');
+					return; // Prevent further execution
+				}
+	
+				updateQuantity(input, newQuantity); // Call update function
+			});
+		});
+	
+		// Add event listeners to decrement buttons
+		document.querySelectorAll('.btn-num-product-down').forEach(button => {
+			button.addEventListener('click', function () {
+				const input = this.parentElement.querySelector('.num-product');
+				const currentValue = parseInt(input.value);
+				const minValue = parseInt(input.min);
+				const newQuantity = currentValue > minValue ? currentValue - 1 : currentValue; // Decrement value
+	
+				if (newQuantity !== currentValue) {
+					updateQuantity(input, newQuantity); // Call update function
+				}
+			});
+		});
+	});
+	
+	</script> 
 
-
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+		
+			const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+	
+			
+			document.querySelectorAll(".delete-product").forEach(button => {
+				button.addEventListener("click", function() {
+					const cartItemId = this.getAttribute("data-cart-item-id");
+					const variantId = this.getAttribute("data-variant-id");
+	
+					fetch(`/cart/delete/${variantId}/`, {
+						method: "POST",
+						headers: {
+							"X-CSRFToken": csrftoken,
+							"Content-Type": "application/json",
+						},
+					})
+					.then(response => response.json())
+					.then(data => {
+						if (data.success) {
+							
+							document.querySelector(`[data-cart-item-id="${cartItemId}"]`).closest("tr").remove();
+	
+							
+							document.querySelector("#cart-total-price").textContent = `Rs ${data.cart_total_price}`;
+							document.querySelector("#cart-total-items").textContent = data.cart_total_items;
+						} else {
+							alert(data.message);
+						}
+					})
+					.catch(error => {
+						console.error("Error:", error);
+					});
+				});
+			});
+		});
+	</script>
+	<!-- <script>
+		document.querySelectorAll(".btn-num-product-down, .btn-num-product-up").forEach(button => {
+			button.addEventListener("click", function() {
+				const cartItemId = this.getAttribute("data-cart-item-id");
+				const action = this.getAttribute("data-action");
+	
+				fetch(`/cart/update/`, {
+					method: "POST",
+					headers: {
+						"X-CSRFToken": csrftoken,
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						cart_item_id: cartItemId,
+						action: action,
+					}),
+				})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						// Update quantity and totals
+						document.querySelector(`[name="quantity_${cartItemId}"]`).value = data.new_quantity;
+						document.querySelector(`#item-total-price-${cartItemId}`).textContent = `Rs ${data.item_total_price}`;
+						document.querySelector("#cart-total-price").textContent = `Rs ${data.cart_total_price}`;
+						document.querySelector("#cart-total-items").textContent = data.cart_total_items;
+					} else {
+						alert(data.message);
+					}
+				})
+				.catch(error => {
+					console.error("Error:", error);
+				});
+			});
+		});
+	</script> -->
 	<!-- Back to top -->
 	<div class="btn-back-to-top" id="myBtn">
 		<span class="symbol-btn-back-to-top">
 			<i class="zmdi zmdi-chevron-up"></i>
 		</span>
 	</div>
+	const csrftoken = getCookie('csrftoken');
+
+
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!(/^GET|HEAD|OPTIONS|TRACE$/.test(settings.type)) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
 	<script>
 		document.addEventListener('DOMContentLoaded', function() {
 			let currentSlide = 0;
 			const slides = document.querySelectorAll('.item-slick1');
 			const dots = document.querySelector('.wrap-slick1-dots');
 			
-			// Create dots
+		
 			slides.forEach((_, index) => {
 				const dot = document.createElement('div');
 				dot.className = `slick1-dot ${index === 0 ? 'active' : ''}`;
@@ -664,20 +815,19 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 				dots.appendChild(dot);
 			});
 	
-			// Show slide
+			
 			function showSlide(index) {
-				// Hide all slides
+		
 				slides.forEach(slide => {
-					// slide.style.display = 'none';
+					
 					slide.querySelectorAll('.animated').forEach(el => {
 						el.classList.remove(el.dataset.appear);
 					});
 				});
 	
-				// Show current slide
 				slides[index].style.display = 'block';
 				
-				// Trigger animations
+		
 				setTimeout(() => {
 					slides[index].querySelectorAll('.animated').forEach((el, i) => {
 						setTimeout(() => {
@@ -686,13 +836,13 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 					});
 				}, 100);
 	
-				// Update dots
+			
 				document.querySelectorAll('.slick1-dot').forEach((dot, i) => {
 					dot.classList.toggle('active', i === index);
 				});
 			}
 	
-			// Go to specific slide
+	
 			function goToSlide(index) {
 				currentSlide = index;
 				showSlide(currentSlide);
@@ -711,7 +861,7 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 			showSlide(0);
 		});
 	</script>
-	<!-- <script>
+	<script>
 	function updateQuantity(itemId, newQuantity) {
     fetch(`/cart/update_quantity/${itemId}/`, {
         method: 'POST',
@@ -734,10 +884,10 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
     .catch(error => console.error('Error:', error));
 }
 
-</script>  -->
+</script> 
 
 
-<!-- <script>
+<script>
 document.querySelectorAll('input[type="number"]').forEach(input => {
     input.addEventListener('change', function() {
         const cartItemId = this.dataset.id;
@@ -757,69 +907,38 @@ document.querySelectorAll('input[type="number"]').forEach(input => {
         });
     });
 });
-</script> -->
-
+</script>
 <script>
-	document.addEventListener('DOMContentLoaded', () => {
-    // Function to handle frontend and backend update
-    const updateQuantity = (input, newQuantity) => {
-        const cartId = input.dataset.cartId; // Get the cart item ID from a data attribute
+	$(document).ready(function(){
+		// Function to get CSRF token from cookies
+		function getCookie(name) {
+			let cookieValue = null;
+			if (document.cookie && document.cookie !== '') {
+				let cookies = document.cookie.split(';');
+				for (let i = 0; i < cookies.length; i++) {
+					let cookie = cookies[i].trim();
+					// Does this cookie string begin with the name we want?
+					if (cookie.substring(0, name.length + 1) === (name + '=')) {
+						cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+						break;
+					}
+				}
+			}
+			return cookieValue;
+		}
+		const csrftoken = getCookie('csrftoken');
+	
+		// Function to update cart display
+		function updateCartDisplay(data) {
+			if(data.cart_total_items !== undefined){
+				$('#cart-total-items').text(data.cart_total_items);
+			}
+			if(data.cart_total_price !== undefined){
+				$('#cart-total-price').text('Rs ' + data.cart_total_price.toFixed(2));
+			}
+		}
+	
 		
-        // Update the frontend
-        input.value = newQuantity;
-        // Make AJAX request to update the backend
-        fetch(`cart/${cartId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value, // CSRF token
-            },
-            body: JSON.stringify({ quantity: newQuantity })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log('Quantity updated successfully on the backend');
-                    // Optionally update total prices in the DOM
-                    document.querySelector('#cart-total').textContent = data.cart_total;
-                } else {
-                    alert(data.error);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    };
-
-    // Add event listeners to increment buttons
-    document.querySelectorAll('.btn-num-product-up').forEach(button => {
-        button.addEventListener('click', function () {
-            const input = this.parentElement.querySelector('.num-product');
-            const currentValue = parseInt(input.value);
-			const maxValue = 3; 
-            const newQuantity = currentValue + 1; // Increment value
-
-			if (newQuantity > maxValue) {
-                // Display the popup message
-                alert('Only 3 quantities are allowed for this product.');
-                return; // Prevent further execution
-            }
-
-            updateQuantity(input, newQuantity); // Call update function
-        });
-    });
-
-    // Add event listeners to decrement buttons
-    document.querySelectorAll('.btn-num-product-down').forEach(button => {
-        button.addEventListener('click', function () {
-            const input = this.parentElement.querySelector('.num-product');
-            const currentValue = parseInt(input.value);
-            const minValue = parseInt(input.min);
-            const newQuantity = currentValue > minValue ? currentValue - 1 : currentValue; // Decrement value
-
-            if (newQuantity !== currentValue) {
-                updateQuantity(input, newQuantity); // Call update function
-            }
-        });
-    });
 });
 
 </script> 
@@ -860,6 +979,8 @@ document.querySelectorAll('input[type="number"]').forEach(input => {
 
 </script>
 
+  
+  
 <!--===============================================================================================-->	
 	<script src="{% static 'frontend/asset/vendor/jquery/jquery-3.2.1.min.js' %}"></script>
 <!--===============================================================================================-->

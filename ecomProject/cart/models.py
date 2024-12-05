@@ -3,17 +3,26 @@ from django.conf import settings
 from products.models import Variant
 from django.utils import timezone
 from accounts.models import CustomUser
+from coupons.models import Coupon
 
 class Cart(models.Model):
     cart_id = models.CharField(max_length=250, blank=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     date_added = models.DateField(default=timezone.now)
+    coupon = models.ForeignKey(
+        'coupons.Coupon', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='carts'
+    )
     
     def __str__(self):
         return f"Cart of {self.user.username if self.user else 'Guest'}"
 
     def total_price(self):
         return sum(item.total_price() for item in self.items.all())
+    
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)

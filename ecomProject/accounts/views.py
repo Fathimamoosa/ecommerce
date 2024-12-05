@@ -21,8 +21,9 @@ from django.contrib.auth import logout
 from orders.models import Order, OrderItem
 
 class CustomPasswordResetView(PasswordResetView):
-    template_name = 'accounts/password_reset.html'  
+    template_name = 'accounts/password_reset.html' 
     success_url = reverse_lazy('password_reset_done')
+    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -49,9 +50,9 @@ def custom_login(request):
                 elif user.is_blocked:
                     messages.error(request, 'Your account is blocked.')
                 else:
-                    login(request, user)  # Log the user in
+                    login(request, user)  
                     messages.success(request, f'Welcome, {user.email if user.email else user.username}!')
-                    return redirect('home')  # Redirect to the desired page after login
+                    return redirect('home')  
             else:
                 messages.error(request, 'Invalid username or email and password combination.')
         else:
@@ -60,8 +61,6 @@ def custom_login(request):
         form = CustomAuthenticationForm()
 
     return render(request, 'accounts/login.html', {'form': form})
-                
-
 
 class LogoutView(View):
     def post(self, request):
@@ -79,17 +78,13 @@ def home(request):
         'categories': categories,
         'variants': variants
     })
-
-    # products = Products.objects.all()
-    # categories = Category.objects.all()
-    # variants = Variant.objects.all() 
-    # products = Products.objects.prefetch_related('images').all()
-    # return render(request, 'accounts/home.html', {'products': products, 'categories': categories, 'variants' : variants})
     profile = Profile.objects.get(user=request.user)
     return render(request, 'home.html', {'profile': profile})
 
+
 def about(request):
     return render(request, 'accounts/about.html') 
+
 
 def contact(request):
     return render(request, 'accounts/contact.html')

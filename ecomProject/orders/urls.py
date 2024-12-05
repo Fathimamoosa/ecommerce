@@ -12,10 +12,8 @@ urlpatterns = [
     path('order-detail/<int:order_id>/', views.order_detail, name='order_detail'),
     path('orders/update/<int:order_id>/', views.update_order_status, name='update_order_status'),
     path('orders/cancel/<int:order_id>/', views.cancel_order, name='cancel_order'),
-    # path('payment/initiate-payment/', views.initiate_payment, name='initiate_payment'),
-    path('paymnet/payment/callback/', views.payment_callback, name='payment_callback'),
-    path('proceed-to-pay', views.razorpaycheck)
-
+    path("redirect-to-payment/", views.redirect_to_payment, name="redirect_to_payment"),
+    path("order/success/<int:order_id>/", views.order_success, name="order_success"),
 ]
 
     

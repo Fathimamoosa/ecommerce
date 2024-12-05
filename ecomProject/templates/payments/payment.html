@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="text-center">Pay Through Razorpay</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="mt-4 px-3 text-center">You have selected online payment. 
+                            Click on the Pay button to make your payment of ₹ {{ total_price }}.</p>
+                        <div class="text-center">
+                            <button id="rzp-button1" class="btn btn-info btn-lg mt-3">Pay</button>
+                        </div>
+                            
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+var options = {
+    "key": "{{ settings.RAZORPAY_KEY_ID }}", // Enter the Key ID generated from the Dashboard
+    "amount": "{{ payment_amount }}", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+    "currency": "INR",
+    "name": "Project1", //your business name
+    "description": " Transcations Testing",
+    "image": "{% static 'user/images/logo.png' %}",
+    "order_id":"{{ order_id }}", //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+    "callback_url": "http://127.0.0.1:8000/payments/payment_callback/",
+    "prefill": { //We recommend using the prefill parameter to auto-fill customer's contact information especially their phone number
+        "name": "{{user.first_name}}", //your customer's name
+        "email": "{{user.email}}",
+        "contact": "{{user.phone_number}}" //Provide the customer's phone number for better conversion rates 
+    },
+    "notes": {
+        "address": "Razorpay Corporate Office"
+    },
+    "theme": {
+        "color": "#3399cc"
+    }
+};
+var rzp1 = new Razorpay(options);
+document.getElementById('rzp-button1').onclick = function(e){
+    rzp1.open();
+    e.preventDefault();
+}
+</script>
+    <!-- <script>
+        var options = {
+            "key": "{{ settings.RAZORPAY_API_KEY }}", 
+            "amount": "{{ amount }} * 100 ", 
+            "currency": "INR",
+            "name": "Project1",
+            "description": "Order Payment",
+            "order_id": "{{ order.razorpay_order_id }}",
+            "handler": function (response){
+                document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+                document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+                document.getElementById('razorpay_signature').value = response.razorpay_signature;
+                document.getElementById('payment-form').submit();
+            },
+            "theme": {
+                "color": "#F37254"
+            }
+        };
+        var rzp1 = new Razorpay(options);
+        document.getElementById('rzp-button').onclick = function(e){
+            rzp1.open();
+            e.preventDefault();
+        }
+    </script> -->
+</body>
+</html>
