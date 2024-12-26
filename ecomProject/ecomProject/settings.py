@@ -116,11 +116,11 @@ WSGI_APPLICATION = 'ecomProject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': config('ENGINE', default='django.db.backends.postgresql'),
-        'NAME': config('NAME', default='default_db'),
-        'USER': config('USER', default='default_user'),
-        'PASSWORD': config('PASSWORD', default='default_password'),
+        'NAME': config('NAME', default='lustrelux'),
+        'USER': config('USER', default='lustrelux'),
+        'PASSWORD': config('PASSWORD', default='root'),
         'HOST': config('HOST', default='localhost'),
-        'PORT': config('PORT', default='5432'),
+        'PORT': config('PORT', default=5432),
     }
 }
 
