@@ -6,7 +6,7 @@ import os
 from brand.models import Brand
 from django.urls import reverse
 from accounts.models import CustomUser
-
+from offers.models  import  VariantOffer, CategoryOffer
  
 
 class Products(models.Model):
@@ -43,12 +43,29 @@ class Variant(models.Model):
     def in_stock(self):
         return self.stock >0
 
+
     def __str__(self):
         return f"{self.price} - {self.carat} carat {self.stock} stock"
     
     def get_url(self):
         """Get the URL of the product detail page for this variant."""
         return reverse('products:product_detail', args=[self.product.id])
+    
+    def get_discounted_price(self):
+        variant_offer = VariantOffer.objects.filter(variant=self, is_active=True).first()
+        if variant_offer:
+            return self.base_price - variant_offer.discount_amount
+
+
+        category_offer = CategoryOffer.objects.filter(
+            category=self.product.category, is_active=True
+        ).first()
+        if category_offer:
+            return self.base_price - category_offer.discount_amount
+        return self.base_price
+
+    def __str__(self):
+        return self.product_name
 
 class Review(models.Model):
     product = models.ForeignKey(Products, related_name='reviews', on_delete=models.CASCADE)

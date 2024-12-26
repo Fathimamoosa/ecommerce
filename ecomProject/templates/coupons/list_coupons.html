@@ -1,0 +1,28 @@
+<h2>Available Coupons</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Discount</th>
+            <th>Valid Until</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for coupon in coupons %}
+        <tr>
+            <td>{{ coupon.code }}</td>
+            <td>{{ coupon.discount }}%</td>
+            <td>{{ coupon.valid_until|date:"d M, Y H:i" }}</td>
+            <td>
+                <a href="{% url 'apply_selected_coupon' coupon.code %}" class="btn btn-success">Use Coupon</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No coupons available.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+

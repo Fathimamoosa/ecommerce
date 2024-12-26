@@ -2,15 +2,18 @@
 
 {% block title %}
 Dashboard
+
+
 {% endblock %}
 
 {% block content %}
+
         <section class="content-main">
             <div class="content-header">
                 <div>
                     <h2 class="content-title card-title">Dashboard </h2>
                     <p>Whole data about your business here</p>
-                    <canvas id="Chart"  height="120px"></canvas>
+                    
                 </div>
                 <div>
                     <a href="#" class="btn btn-primary"><i class="text-muted material-icons md-post_add"></i>Create report</a>
@@ -25,6 +28,7 @@ Dashboard
                                 <h6 class="mb-1 card-title">Revenue</h6>
                                 <span></span>
                                 <span class="text-sm">
+                                    <p>₹ {{ total_revenue }}</p>
                                     Shipping fees are not included
                                 </span>
                             </div>
@@ -38,6 +42,21 @@ Dashboard
                             <div class="text">
                                 <h6 class="mb-1 card-title">Orders</h6> <span></span>
                                 <span class="text-sm">
+                                    <p>{{ total_orders }}</p>
+                                    Excluding orders in transit
+                                </span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card card-body mb-4">
+                        <article class="icontext">
+                            <span class="icon icon-sm rounded-circle bg-success-light"><i class="text-success material-icons md-local_shipping"></i></span>
+                            <div class="text">
+                                <h6 class="mb-1 card-title">Products</h6> <span></span>
+                                <span class="text-sm">
+                                    <p>{{ total_products }}</p>
                                     Excluding orders in transit
                                 </span>
                             </div>
@@ -49,22 +68,10 @@ Dashboard
                         <article class="icontext">
                             <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
                             <div class="text">
-                                <h6 class="mb-1 card-title">Products</h6> <span></span>
+                                <h6 class="mb-1 card-title">Users</h6> <span></span>
                                 <span class="text-sm">
+                                    <p>{{ total_users }}</p>
                                     In 4 Categories
-                                </span>
-                            </div>
-                        </article>
-                    </div>
-                </div>
-                <div class="col-lg-3">
-                    <div class="card card-body mb-4">
-                        <article class="icontext">
-                            <span class="icon icon-sm rounded-circle bg-info-light"><i class="text-info material-icons md-shopping_basket"></i></span>
-                            <div class="text">
-                                <h6 class="mb-1 card-title">Monthly Earning</h6> <span></span>
-                                <span class="text-sm">
-                                    Based in your local time.
                                 </span>
                             </div>
                         </article>
@@ -72,98 +79,173 @@ Dashboard
                 </div>
             </div>
             <div class="row">
-                <div class="col-xl-8 col-lg-12">
-                    <div class="card mb-4">
-                        <article class="card-body">
-                            <h5 class="card-title">Sale statistics</h5>
-                        </article>
-                    </div>
-                                    </div>
-                                </article>
-                            </div>
-                        </div>
-                        <div class="col-lg-7">
-                            <div class="card mb-4">
+                <div class="container mt-4">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-6">
+                            <div class="card mb-4 shadow-sm">
                                 <article class="card-body">
-                                    <h5 class="card-title">Monthly User Registration</h5>
-                                    <ul class="verti-timeline list-unstyled font-sm">
-                                        </ul>
+                                    <h5 class="card-title">Best Selling Products</h5>
                                 </article>
+                                <table class="table table-bordered table-hover">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Sl No</th>
+                                            <th>Product Name</th>
+                                            <!-- <th>Total Quantity Sold</th> -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for product in top_products %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ product.product_name }}</td> 
+                                            <td>{{ product.product.category__category_name }}</td> 
+                                            <!-- <td>{{ product.total_quantity_sold }}</td> -->
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center">No products found.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-lg-6">
+                            <div class="card mb-4 shadow-sm">
+                                <article class="card-body">
+                                    <h5 class="card-title">Best Selling Categories</h5>
+                                </article>
+                                <table class="table table-bordered table-hover">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Sl No</th>
+                                            <th>Category Name</th>
+                                            <!-- <th>Total Quantity Sold</th> -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for category in top_categories %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ category.category_name }}</td>
+                                            <!-- <td>{{ category.total_quantity }}</td> -->
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="3" class="text-center">No categories found.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-4 col-lg-12">
-                    <div class="card mb-4">
-                        <article class="card-body">
-                            <h5 class="card-title">Best Selling product </h5>
-                        </article>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-4">
-                <header class="card-header">
-                    <h4 class="card-title">Latest orders</h4>
-                    <div class="row align-items-center">
-                        <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
-                            <div class="custom_select">
-                                <select class="form-select select-nice">
-                                    <option selected>All Categories</option>
-                                    <option>Rings</option>
-                                    <option>Earrings</option>
-                                    <option>Bangles</option>
-                                    <option>Earrings</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-2 col-6">
-                            <input type="date" value="02.05.2022" class="form-control">
-                        </div>
-                        <div class="col-md-2 col-6">
-                            <div class="custom_select">
-                                <select class="form-select select-nice">
-                                    <option selected>Status</option>
-                                    <option>All</option>
-                                    <option>Paid</option>
-                                    <option>Chargeback</option>
-                                    <option>Refund</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </header>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <div class="table-responsive">
-                            <table class="table align-middle table-nowrap mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th scope="col" class="text-center">
-                                            <div class="form-check align-middle">
-                                                <input class="form-check-input" type="checkbox" id="transactionCheck01">
-                                                <label class="form-check-label" for="transactionCheck01"></label>
-                                            </div>
-                                        </th>
-                                        <th class="align-middle" scope="col">Order ID</th>
-                                        <th class="align-middle" scope="col">Billing Name</th>
-                                        <th class="align-middle" scope="col">Date</th>
-                                        <th class="align-middle" scope="col">Total</th>
-                                        <th class="align-middle" scope="col">Payment Status</th>
-                                        <th class="align-middle" scope="col">Payment Method</th>
-                                        <th class="align-middle" scope="col">View Details</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    
-                                        
-                                        
-                                    
-                                </tbody>
-                            </table>
-                        </div>
-                    </div> <!-- table-responsive end// -->
                 </div>
             </div>
+            <h2>Sale Statistics</h2>
+
+            <form method="GET" id="filter-form">
+                <label for="filter">Select Time Period: </label>
+                <select id="filter" name="filter" onchange="fetchData()">
+                    <option value="weekly" selected>Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+            </form>
+
+    <canvas id="salesChart"  height="120px"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let salesChart = null;
+    function fetchData() {
+        console.log("change");
+        const filter = document.getElementById("filter").value;
+        fetch(`/custom-admin/sales-data/?filter=${filter}`)
+            .then(response => response.json())
+            .then(data => {
+              
+                renderChart(data.labels, data.data);
+            });
+    }
+    function renderChart(labels, data) {
+        const ctx = document.getElementById('salesChart').getContext('2d');
+
+        if (salesChart) {
+            salesChart.destroy();
+        }
+
+        
+        salesChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total Sales in Rs',
+                    data: data,
+                    backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                    borderColor: 'rgba(53, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+    fetchData();
+</script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Function to fetch data based on selected filter
+        function fetchData() {
+            console.log("change")
+            const filter = document.getElementById("filter").value;
+
+            // Make a GET request to the view
+            fetch(`/custom-admin/sales-data/?filter=${filter}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Render the chart with the fetched data
+                    renderChart(data.labels, data.data);
+                    
+                });
+        }
+
+        // Function to render the Chart.js chart
+        function renderChart(labels, data) {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Sales in Rs',
+                        data: data,
+                        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                        borderColor: 'rgba(53, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initial fetch for the default filter (Weekly)
+        fetchData(); -->
+    <!-- </script> -->
+            
             <div class="pagination-area mt-30 mb-50">
                 <nav aria-label="Page navigation example">
                     <ul class="pagination justify-content-start">
@@ -177,6 +259,7 @@ Dashboard
                 </nav>
             </div>
         </section> <!-- content-main end// -->
+        
         <footer class="main-footer font-xs">
             <div class="row pb-30 pt-15">
                 <div class="col-sm-6">
@@ -204,4 +287,5 @@ Dashboard
 </body>
 
 </html>
+
 {% endblock %}

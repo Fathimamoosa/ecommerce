@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Shoping Cart</title>
+	<title>My Orders</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 <!--===============================================================================================-->	
@@ -37,6 +37,102 @@
 <!--===============================================================================================-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .order-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .order-summary img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .order-details {
+            flex: 1;
+            padding-left: 20px;
+        }
+
+        .order-details h2 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .order-details p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .price {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #000;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .btn-cancel {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+
+        .btn-return {
+            background-color: #2ecc71;
+            color: #fff;
+        }
+
+        .btn-back {
+            margin-top: 20px;
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .info-message {
+            color: #999;
+            font-style: italic;
+            margin-top: 10px;
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -100,6 +196,99 @@
         .btn-back:hover {
             background-color: #2980b9;
         }
+        .container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.order-summary {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.order-id {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.order-status {
+    font-weight: 500;
+    color: #28a745; /* Green color for delivered */
+}
+
+.table {
+    margin-top: 30px;
+    width: 100%;
+    border-radius: 8px;
+}
+
+.table th, .table td {
+    text-align: center;
+    padding: 10px;
+}
+
+.table-striped tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+.column-1 img {
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.column-5, .column-6 {
+    font-weight: bold;
+}
+
+.user-actions {
+    margin-top: 20px;
+}
+
+.user-actions .btn {
+    font-weight: 600;
+    padding: 10px 20px;
+    width: 200px;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.back-to-shop {
+    margin-top: 20px;
+}
+
+.info-message {
+    color: #6c757d;
+    font-style: italic;
+    margin-top: 10px;
+}
+
     </style>
 </head>
 <body class="animsition">
@@ -301,46 +490,162 @@
 			</div>
 		</div>
 	</header>
-    <div class="container">
+    <!-- <div class="container">
         <h1>Order Details</h1>
-        <p><strong>Order Number:</strong> {{ order.order_number }}</p>
-        <p><strong>Customer Name:</strong> {{ order.fname }} {{ order.lname }}</p>
-        <p><strong>Email:</strong> {{ order.email }}</p>
-        <p><strong>Phone:</strong> {{ order.phone }}</p>
-        <p><strong>Address:</strong> {{ order.address }}, {{ order.city }}, {{ order.state }}, {{ order.country }} - {{ order.pincode }}</p>
-        <p><strong>Total Price:</strong> ₹{{ order.total_price }}</p>
-        <p><strong>Order Status:</strong> 
-            <span class="order-status status-{{ order.status|lower }}">
-                {{ order.status }}
-            </span>
-        </p>
-        <p><strong>Order Date:</strong> {{ order.order_date|date:"d.m.Y" }}</p>
-
-        <h2>Order Items</h2>
-        <ul>
-            {% for item in order.items.all %}
-            <li>
-                {{ item.product.product_name }} - {{ item.variant.carat }} carat 
-                (x{{ item.quantity }}) - ₹{{ item.price }}
-            </li>
-            {% endfor %}
-        </ul>
-
-        <!-- Buttons for user actions -->
-        {% if order.status in 'Pending' or order.status == 'Confirmed' %}
-        <form action="{% url 'orders:cancel_order' order.id %}" method="POST" onsubmit="return confirmCancelOrder();">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-cancel">Cancel Order</button>
-        </form>
-        <!-- <a href="{% url 'orders:cancel_order' order.id %}" class="btn btn-cancel">Cancel Order</a> -->
-        {% else %}
-        <p class="info-message">This order cannot be canceled at this stage.</p>
-        {% endif %}
     
-        <a href="{% url 'orders:checkout' %}" class="btn btn-back">Back to Orders</a>
+        <!-- Order Summary -->
+        <!-- <div class="order-summary">
+            <h3>Order ID: {{ order.order_number }}</h3>
+            <p><strong>Order Date:</strong> {{ order.order_date|date:"d M Y" }}</p>
+            <p><strong>Status:</strong> <span class="order-status">{{ order.status }}</span></p>
+            <p><strong>Total Price:</strong> ₹{{ order.total_price }}</p>
+            <p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
+            <hr>
+        </div> -->
+    
+        <!-- Order Items -->
+        <!-- <table class="table-shopping-cart">
+            <thead>
+                <tr class="table_head">
+                    <th class="column-1">Image</th>
+                    <th class="column-2">Name</th>
+                    <th class="column-3">Price</th>
+                    <th class="column-4">Quantity</th>
+                    <th class="column-5">Total</th>
+                    <th class="column-6">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in order.items.all %}
+                <tr class="table_row">
+                    <td class="column-1">
+                        <div class="how-itemcart1">
+                            <img src="{{ order.variant.product.images.first.image.url }}" alt="{{ item.product.product_name }}" width="100" height="100">
+                        </div>
+                    </td>
+                    <td class="column-2">{{ order.variant.product.product_name }}</td>
+                    <td class="column-3">₹{{ order.price }}</td>
+                    <td class="column-4">{{ order.quantity }}</td>
+                    <td class="column-5">₹{{ order.total_price|floatformat:2 }}</td>
+                    <td class="column-6">{{ order.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    
+        <!-- User Actions -->
+        <!-- <div class="user-actions">
+            {% if order.status in 'Pending' or order.status == 'Confirmed' %}
+            <form action="{% url 'orders:cancel_order' order.id %}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-cancel">Cancel Order</button>
+            </form>
+            {% elif order.status == 'Delivered' %}
+            <form action="{% url 'orders:return_order' order.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-return">Return Order</button>
+            </form>
+            {% else %}
+            <p class="info-message">This order cannot be modified at this stage.</p>
+            {% endif %}
+        </div> -->
+    
+        <!-- Back to Shop -->
+        <!-- <div class="back-to-shop">
+            <a href="{% url 'orders' %}" class="btn btn-back">Back to Order</a>
+        </div>
+    </div> --> 
+    
+
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Order Details</h1>
+        
+        <!-- Order Summary -->
+        <div class="order-summary mb-5 card p-4 shadow-sm">
+            <h3 class="order-id text-primary">Order ID: {{ order.order_number }}</h3>
+            <p><strong>Order Date:</strong> {{ order.order_date|date:"d M Y" }}</p>
+            <p><strong>Status:</strong> <span class="order-status">{{ order.status }}</span></p>
+            <p><strong>Total Price:</strong> ₹{{ order.total_price }}</p>
+            <p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
+            <hr>
+        </div>
+    
+        <!-- Order Items -->
+        <div class="order-items mb-5">
+            <div class="row">
+                {% for item in order.items.all %}
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <img src="{{ OrderItem.variant.product.images.first.image.url }}" alt="{{ item.variant.product.product_name }}" class="img-fluid" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; margin-right: 20px;">
+                                <div>
+                                    <h5>{{ item.variant.product.product_name }}</h5>
+                                    <p><strong>Price:</strong> ₹{{ item.price }}</p>
+                                    <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+                                    <p><strong>Total:</strong> ₹{{ item.total_price|floatformat:2 }}</p>
+                                    <p><strong>Status:</strong>
+                                        {% if item.status|lower == 'delivered' %}
+                                            <span class="badge bg-success text-white">{{ item.status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-white">{{ item.status }}</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    
+        <!-- User Actions -->
+        <div class="user-actions mt-4 text-center">
+            {% if order.status == 'Pending' %}
+        <form action="{% url 'orders:retry_payment' order.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-lg">Retry Payment</button>
+        </form>
+        {% elif order.status in 'Confirmed' %}
+        <form action="{% url 'orders:cancel_order' order.id %}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-lg">Cancel Order</button>
+        </form>
+            {% elif order.status == 'Delivered' %}
+            <form action="{% url 'orders:return_order' order.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-return">Return Order</button>
+            </form>
+            {% else %}
+            <p class="info-message">This order cannot be modified at this stage.</p>
+            {% endif %}
+        </div>
+    
+        <!-- Back to Shop -->
+        <div class="user-actions mt-4 text-center">
+        <div class="back-to-shop mt-4 text-center">
+            <a href="{% url 'orders' %}" class="btn btn-secondary btn-lg">Back to Orders</a>
+        </div>
     </div>
 
-<br/><br/><br/>
+      <!-- Back to Shop -->
+    <div class="user-actions mt-4 text-center">
+    {% if order.status == "Confirmed" or order.status == "Delivered" %}
+    <form method="get" action="{% url 'orders:generate_invoice' order.id %}">
+        <button type="submit" class="btn btn-primary">Download Invoice</button>
+    </form>
+    {% else %}
+        <p>Invoice cannot be generated for this order status.</p>
+    {% endif %}
+    </div>
+
+
+    
+    
+</body>
+    
+</body>
 <!-- footer -->
 <footer class="bg3 p-t-75 p-b-32">
     <div class="container">

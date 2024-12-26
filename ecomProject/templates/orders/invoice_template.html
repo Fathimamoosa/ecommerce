@@ -1,0 +1,68 @@
+ <!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice - {{ order.order_number }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .invoice-box {
+            width: 100%;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin: 20px auto;
+            max-width: 700px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table td, table th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        table th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="invoice-box">
+        <h2>Invoice</h2>
+        <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+        <!-- <strong>{{ address.name }}</strong><br>
+        {{ address.address_line1 }}, {{ address.address_line2 }}<br>
+        {{ address.city }}, {{ address.state }} - {{ address.pincode }}<br>
+        Phone: {{ address.contact_number }} -->
+        <p><strong>Order Date:</strong> {{ order.order_date }}</p>
+        <p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
+
+        <h3>Order Items</h3>
+        <table>
+            <tr>
+                <th>Product</th>
+                <th>Variant</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Subtotal</th>
+            </tr>
+            {% for item in order.items.all %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.variant }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.price|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="4" align="right"><strong>Total:</strong></td>
+                <td>{{ order.total_price }}</td>
+            </tr>
+        </table>
+    </div>
+    
+</body>
+</html> 
+

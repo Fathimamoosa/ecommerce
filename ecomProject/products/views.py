@@ -17,7 +17,8 @@ from cart.views import _cart_id
 from cart.models import CartItem, Cart
 from django.db.models import Min, Max
 from .forms import ReviewForm
-
+from datetime import datetime
+from offers.models import VariantOffer, CategoryOffer
 def custom_admin_required(user):
     return user.is_staff  
 
@@ -251,10 +252,27 @@ def product_view(request, product_id):
     elif sort_by == 'z_to_a':
         product_images = product_images.order_by('-id')
 
+    
+    relevant_offer = VariantOffer.objects.filter(
+        Q(variant=variant) | Q(variant__product__category=variant.product.category),  
+        is_active=True
+    ).first()
+
+    
+    variants = product.variants.all()
+    for variant in variants:
+        if relevant_offer:
+            offer_value = relevant_offer.offer_value
+            variant.offer_price = max(variant.price - offer_value, 0) 
+        else:
+            variant.offer_price = variant.price
+
     return render(request, 'products/product.html', {
         'product': product,
         'product_images': product_images,
-        'categories': categories
+        'categories': categories,
+        'variants': variants,
+        'offer': relevant_offer
     })
 
 
@@ -316,7 +334,6 @@ class ProductListView(ListView):
             ) | queryset.filter(
                 product__description__icontains=query
             )
-
         min_price = self.request.GET.get('min_price')
         max_price = self.request.GET.get('max_price')
         if min_price:
@@ -328,6 +345,17 @@ class ProductListView(ListView):
         elif sort == 'price_high_to_low':
             queryset = queryset.order_by('-price')
         
+        for variant in queryset:
+            relevant_offer =  VariantOffer.objects.filter(
+                Q(variant=variant) | Q(variant__product__category=variant.product.category), 
+                is_active=True
+            ).first()
+
+            if relevant_offer and hasattr(relevant_offer, 'offer_value'):
+                offer_value = relevant_offer.offer_value
+                variant.offer_price = variant.price - offer_value  # Assuming offer_value is a fixed discount amount
+            else:
+                variant.offer_price = variant.price
 
         return queryset.distinct()
 

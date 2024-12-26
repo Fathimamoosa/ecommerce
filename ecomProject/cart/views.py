@@ -1,8 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from products.models import Products
+from products.models import Products,Variant
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from products.models import Variant
 from .models import Cart, CartItem
 from django.contrib import messages
 from django.db.models import F, Sum
@@ -16,42 +15,132 @@ from django.shortcuts import render, get_object_or_404
 from django.utils.timezone import now
 from .models import Cart, CartItem, Coupon
 
+def calculate_cart_total(cart):
+    cart_items = cart.cartitem_set.all()
+    return sum(item.variant.price * item.quantity for item in cart_items)
+
+def get_cart_for_user(request):
+    if request.user.is_authenticated:
+        return get_object_or_404(Cart, cart_id=request.user.id)
+    else:
+        cart_id = _cart_id(request)
+        return get_object_or_404(Cart, cart_id=cart_id)
+
 def cart_summary(request):
     if request.user.is_authenticated:
         cart = get_object_or_404(Cart, cart_id=request.user.id)
     else:
         cart_id = _cart_id(request)
         cart = get_object_or_404(Cart, cart_id=cart_id)
+
     cart_items = CartItem.objects.filter(cart=cart)
+    
+    # Calculate subtotal for cart items
     for item in cart_items:
         item.sub_total = item.variant.price * item.quantity  
-    
     total_price = sum(item.sub_total for item in cart_items)
+
+    # Coupon functionality
+    coupon_code = request.POST.get('coupon_code')  # Get coupon code from form submission
+    discount = 0
+    total_price_after_discount = total_price
+
+    # Check for valid coupon
+    if coupon_code:
+        try:
+            coupon = Coupon.objects.get(
+                code=coupon_code,
+                active=True,
+                valid_from__lte=now(),
+                valid_until__gte=now()
+            )
+            discount = (coupon.discount / 100) * total_price
+            total_price_after_discount = total_price - discount
+
+            # Store in session
+            request.session['coupon_code'] = coupon_code
+            request.session['discount'] = discount
+            request.session['total_price_after_discount'] = total_price_after_discount
+        except Coupon.DoesNotExist:
+            request.session['coupon_code'] = None
+            request.session['discount'] = 0
+            request.session['total_price_after_discount'] = total_price
+            # Optional: Add a message for invalid coupon
+
+    # Retrieve values from session if available
+    coupon_code = request.session.get('coupon_code', '')
+    discount = request.session.get('discount', 0)
+    total_price_after_discount = request.session.get('total_price_after_discount', total_price)
+
+    available_coupons = Coupon.objects.filter(
+        active=True,
+        valid_from__lte=now(),
+        valid_until__gte=now()
+    )
+
     return render(
         request, 
         'cart/cart_summary.html', 
         {
             'cart_items': cart_items,
             'total_price': total_price,
+            'total_price_after_discount': total_price_after_discount,
+            'coupon_code': coupon_code,
+            'discount': discount,
+            'available_coupons': available_coupons,
         }
     )
+# def cart_summary(request):
+#     if request.user.is_authenticated:
+#         cart = get_object_or_404(Cart, cart_id=request.user.id)
+#     else:
+#         cart_id = _cart_id(request)
+#         cart = get_object_or_404(Cart, cart_id=cart_id)
+#     cart_items = CartItem.objects.filter(cart=cart)
+#     for item in cart_items:
+#         item.sub_total = item.variant.price * item.quantity  
+
+
+#     total_price = sum(item.sub_total for item in cart_items)
+
+#     available_coupons = Coupon.objects.filter(
+#         active=True,
+#         valid_from__lte=now(),
+#         valid_until__gte=now()
+#     )
+
+#     coupon_code = request.session.get('coupon_code')
+#     discount = request.session.get('discount', 0)
+#     total_price_after_discount = request.session.get('total_price_after_discount', total_price)
+#     return render(
+#         request, 
+#         'cart/cart_summary.html', 
+#         {
+#             'cart_items': cart_items,
+#             'total_price': total_price,
+#             'total_price_after_discount': total_price_after_discount,
+#             'coupon_code': coupon_code,
+#             'discount': discount,
+#             'available_coupons': available_coupons,
+#         }
+#     )
 
 def cart_delete(request, variant_id):
     if request.method == "POST":
         try:
             variant = Variant.objects.get(id=variant_id)
             
-            # Find the cart item
+          
             if request.user.is_authenticated:
                 cart_item = CartItem.objects.get(variant=variant, cart__cart_id=request.user.id)
             else:
                 cart = Cart.objects.get(cart_id=_cart_id(request))
                 cart_item = CartItem.objects.get(variant=variant, cart=cart)
             
-            # Delete the cart item
+          
             cart_item.delete()
 
-            # Calculate updated totals
+        
             if request.user.is_authenticated:
                 cart = Cart.objects.get(cart_id=request.user.id)
             else:
@@ -158,116 +247,6 @@ def remove_from_cart(request, variant_id):
         return redirect("cart_summary")
 
 
-# def add_cart(request, variant_id):
-#     variant = Variant.objects.get(id=variant_id)
-
-#     if request.user.is_authenticated:
-#         cart, created = Cart.objects.get_or_create(cart_id=request.user.id)
-#         cart_item, created = CartItem.objects.get_or_create(
-#             variant=variant,
-#             cart=cart,  
-#             defaults={'quantity': 1},
-#         )
-#         if not created:
-#             if cart_item.quantity < variant.stock:
-#                 if cart_item.quantity < 3:
-#                     cart_item.quantity += 1
-#                     cart_item.save()
-#                 else:
-#                     messages.error(request, "Maximum 3 quantity per product is allowed for a user")
-#                     return redirect("cart_summary")
-#             else:
-#                 messages.error(request, "No more stocks available")
-#                 return redirect("cart_summary")
-#     else:
-#         cart, created = Cart.objects.get_or_create(cart_id=_cart_id(request))
-
-#         cart_item, created = CartItem.objects.get_or_create(
-#             variant=variant,
-#             cart=cart,
-#             defaults={'quantity': 1},
-#         )
-#         if not created:
-#             if cart_item.quantity < variant.stock:
-#                 if cart_item.quantity < 3:
-#                     cart_item.quantity += 1
-#                     cart_item.save()
-#                 else:
-#                     messages.error(request, "Maximum 3 quantity per product is allowed for a user")
-#                     return redirect("cart_summary")
-#             else:
-#                 messages.error(request, "No more stocks available")
-#                 return redirect("cart_summary")
-
-#     return redirect("cart_summary")
-
-# def remove_from_cart(request, variant_id):
-#     if request.method == "POST":
-#         try:
-#             variant = Variant.objects.get(id=variant_id)
-            
-#             if request.user.is_authenticated:
-#                 cart_item = CartItem.objects.get(variant=variant, cart__cart_id=request.user.id)
-#             else:
-#                 cart = Cart.objects.get(cart_id=_cart_id(request))
-#                 cart_item = CartItem.objects.get(variant=variant, cart=cart)
-     
-#             if cart_item.quantity > 1:
-#                 cart_item.quantity -= 1
-#                 cart_item.save()
-#             else:
-#                 cart_item.delete()
-
-#             # Calculate updated totals
-#             if request.user.is_authenticated:
-#                 cart = Cart.objects.get(cart_id=request.user.id)
-#             else:
-#                 cart = Cart.objects.get(cart_id=_cart_id(request))
-            
-#             total_price = sum(item.quantity * item.variant.price for item in cart.cartitem_set.all())
-#             total_items = cart.cartitem_set.count()
-
-#             return JsonResponse({
-#                 "success": True,
-#                 "cart_total_price": total_price,
-#                 "cart_total_items": total_items,
-#                 "message": "Item quantity updated successfully.",
-#             })
-#         except CartItem.DoesNotExist:
-#             return JsonResponse({
-#                 "success": False,
-#                 "message": "Item not found in the cart."
-#             })
-#     return JsonResponse({
-#         "success": False,
-#         "message": "Invalid request method."
-#     })
-
-# def remove_from_cart(request, variant_id):
-#     try:
-#         variant = Variant.objects.get(id=variant_id)
-        
-#         if request.user.is_authenticated:
-            
-#             cart_item = CartItem.objects.get(variant=variant, cart__cart_id=request.user.id)
-            
-#         else:
-#             cart = Cart.objects.get(cart_id=_cart_id(request))
-#             cart_item = CartItem.objects.get(variant=variant, cart=cart)
-     
-#         if cart_item.quantity > 1:
-#             cart_item.quantity -= 1
-#             cart_item.save()
-#         else:
-#             cart_item.delete()
-
-#         return redirect("cart_summary")
-#     except CartItem.DoesNotExist:
-     
-#         messages.error(request, "Item not found in the cart.")
-#         return redirect("cart_summary")
-
-
 @require_POST
 def cart_update(request, cart_id):
     """
@@ -338,6 +317,8 @@ def cart_update(request, cart_id):
         else:
             messages.error(request, data.get('message'))
         return redirect('cart_summary')
+    
+
     
 # @csrf_exempt
 # def cart_update(request):

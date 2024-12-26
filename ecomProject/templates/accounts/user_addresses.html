@@ -407,7 +407,7 @@
         <h2>User Account</h2>
         <a href="{% url 'profile' %}" class="nav-link">Profile</a>
         <a href="{% url 'user_addresses' %}" class="nav-link active">Shipping Address</a>
-        <a href="#" class="nav-link">My Wallet</a>
+        <a href="{% url 'wallet:my_wallet' %}" class="nav-link">My Wallet</a>
         <a href="{% url 'orders' %}" class="nav-link">Orders</a>
         <a href="{% url 'change_password' %}" class="nav-link">Change Password</a>
         <a href="{% url 'account_login' %}" class="nav-link logout">Logout</a>

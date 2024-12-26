@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Success</title>
-    <!-- Add a stylesheet link if needed -->
     <style>
-        /* Add internal CSS here for styling */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f9;
@@ -54,8 +52,8 @@
         <h1>Thank You for Your Order!</h1>
         <p>Your order has been placed successfully.</p>
         <p><strong>Order Number:</strong> {{ order_number }}</p>
-        <p><strong>Total Price:</strong> Rs{{ total_price }}</p>
-        <a href="/" class="btn">Continue Shopping</a>
+        <p><strong>Total Price:</strong> Rs {{ total_price_after_discount|floatformat:2 }}</p>
+        <a href="{% url 'product_list' %}" class="btn">Continue Shopping</a>
     </div>
 </body>
 </html>

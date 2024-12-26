@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from category.managers import CategoryManager, AllCategoryManager
 from PIL import Image
+from offers.models import CategoryOffer
 import os
  
 class Category(models.Model):

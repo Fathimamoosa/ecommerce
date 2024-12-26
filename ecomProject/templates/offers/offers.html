@@ -1,0 +1,126 @@
+{% extends 'custom_admin/base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2>Manage Offers</h2>
+
+        <!-- Button to trigger modal -->
+        <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addOfferModal">
+            Add New Offer
+        </button>
+
+        <!-- Variant Offers Table -->
+        <h2>Variant Offers</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Variant</th>
+                    <th>Discount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for offer in variant_offers %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ offer.variant }}</td>
+                    <td>₹{{ offer.discount_amount }}</td>
+                    <td>{{ offer.is_active|yesno:"Active,Inactive" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No variant offers available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Category Offers Table -->
+        <h2>Category Offers</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Category</th>
+                    <th>Discount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for offer in category_offers %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ offer.category }}</td>
+                    <td>₹{{ offer.discount_amount }}</td>
+                    <td>{{ offer.is_active|yesno:"Active,Inactive" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No category offers available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for Adding Offers -->
+    <div class="modal fade" id="addOfferModal" tabindex="-1" aria-labelledby="addOfferModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addOfferModalLabel">Add New Offer</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <!-- Dropdown to select offer type -->
+                        <div class="form-group">
+                            <label for="offerType">Offer Type</label>
+                            <select name="offer_type" id="offerType" class="form-control" required>
+                                <option value="variant">Variant Offer</option>
+                                <option value="category">Category Offer</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Render the form dynamically -->
+                        {{ form|crispy }}
+                        
+                        <button type="submit" class="btn btn-success">Save Offer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- <div class="modal fade" id="addOfferModal" tabindex="-1" aria-labelledby="addOfferModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addOfferModalLabel">Add New Offer</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-success">Save Offer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- Add Bootstrap JS and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
+

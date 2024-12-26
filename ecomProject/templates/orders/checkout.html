@@ -77,7 +77,7 @@
 					
 					<!-- Logo desktop -->		
 					<a href="#" class="logo">
-						<img src="{% static 'frontend/asset/images/icons/Lustrelux.png' %}" alt="IMG-LOGO">
+						<img src="{% static 'frontend/asset/images/logo.svg' %}" alt="IMG-SAMAYA">
 					</a>
 
 					<!-- Menu desktop -->
@@ -370,20 +370,33 @@
 										>
 									</td>
 									<td>{{ cart_item.variant.product.product_name }}</td>
-									<td></td>
+									<td>{{ cart_item.quantity }}</td>
 									<td>{{ cart_item.variant.price }}</td>
 								</tr>
 								{% endfor %}
 							</tbody>
 						</table>
 						<br/>
-						<h6>Grand total
-							<span class="float-end"> Rs {{ total_price }}</span>
+						<h6>Total Price: 
+							<span class="float-end">Rs {{ total_price|floatformat:2 }}</span>
 						</h6>
+						
+						<!-- Show discount amount -->
+						{% if discount > 0 %}
+						<h6>Discount: 
+							<span class="float-end">- Rs {{ discount|floatformat:2 }}</span>
+						</h6>
+						{% endif %}
+						
+						<!-- Show grand total after discount -->
+						<h6>Grand Total: 
+							<span class="float-end">Rs {{ total_price_after_discount|floatformat:2 }}</span>
+						</h6>
+						<br/>
 						<br/>
 							{% csrf_token %}
 							<h6>Payment Method</h6>
-							{% if total_price <= 50000 or discounted_total <= 50000 %}
+							{% if total_price <= 50000 or total_price_after_discount <= 50000 %}
 							<div class="m-3">
 								<input type="radio" name="payment_method" id="cash_on_delivery" value="cash_on_delivery" required>
 								<label for="cash_on_delivery">Cash On Delivery</label><br>
@@ -393,14 +406,21 @@
 								<input type="radio" name="payment_method" id="online" value="online" required>
 								<label for="online">Online</label><br>
 							</div>
-							{% if wallet.balance >= 0 %}
+							{% if wallet.balance >=  0 %}
 							<div class="m-3">
 								<input type="radio" name="payment_method" id="wallet" value="wallet" required>
 								<label for="wallet">Wallet ( Balance : {{ wallet.balance }})</label><br>
 							</div>
+							<input type="hidden" name="total_amount" value="{{ total_price_after_discount|floatformat:2 }}">
 							{% endif %}
 							<button type="submit" class="btn btn-primary" id="continue-btn">Continue</button>
 						</form>
+						<br/>
+						<br/>
+						<br/>
+						<br/>
+						<br/>
+						<br/>
 						
 						<!-- <h6>Payment Method</h6>
 						{% if total_price <= 50000 or discounted_total <= 50000 %}
@@ -438,7 +458,55 @@
 		</div>
 	</form>
 </div>
+<!-- Bootstrap CSS -->
+<link
+  rel="stylesheet"
+  href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+/>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+	  <div class="modal-content">
+		<div class="modal-header">
+		  <h5 class="modal-title" id="messageModalLabel">Notification</h5>
+		  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+		<div class="modal-body">
+			<!-- Display Django message here -->
+			{% if messages %}
+			  {% for message in messages %}
+				<p>{{ message }}</p>
+			  {% endfor %}
+			{% endif %}
+		</div>
+		<div class="modal-footer">
+		  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+		</div>
+	  </div>
+	</div>
+  </div>
+  
+  {% if messages %}
+	  {% for message in messages %}
+		  <script>
+			  document.addEventListener("DOMContentLoaded", function() {
+				  // Set message content in modal
+				  document.querySelector('.modal-body').innerText = "{{ message }}";
+  
+				  // Show the Bootstrap modal
+				  $('#messageModal').modal('show');
+			  });
+		  </script>
+	  {% endfor %}
+  {% endif %}
+  
 <script>
 	document.addEventListener('DOMContentLoaded', () => {
     // Function to handle frontend and backend update

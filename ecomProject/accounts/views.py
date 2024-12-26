@@ -257,7 +257,7 @@ def set_default_address(request, address_id):
 def user_order_items(request):
     if request.user.is_authenticated:
         orders = Order.objects.filter(user=request.user).order_by('-order_date')
-
+        orders = orders.prefetch_related('items__product__images')
         return render(request, 'accounts/orders.html', {'orders': orders})
     else:
         return redirect('login')

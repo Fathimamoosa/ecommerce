@@ -23,7 +23,7 @@
     <aside class="navbar-aside" id="offcanvas_aside">
         <div class="aside-top">
             <a href="{% url 'dashboard' %}" class="brand-wrap">
-                <img src="{% static 'backend/assets/imgs/theme/logo.jpg' %}" class="logo" alt="Lustrelux  Dashboard">
+                <img src="{% static 'backend/assets/imgs/theme/logo1.svg' %}" class="logo" alt="Lustrelux  Dashboard">
             </a>
             <div>
                 <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i> </button>
@@ -61,8 +61,18 @@
                     </a>
                 </li>
                 <li class="menu-item ">
+                    <a class="menu-link" href="{% url 'offers:offers' %}"> <i class="icon material-icons md-add_box"></i>
+                        <span class="text">Offers</span>
+                    </a>
+                </li>
+                <li class="menu-item ">
                     <a class="menu-link" href="#"> <i class="icon material-icons md-monetization_on"></i>
                         <span class="text">Transactions</span>
+                    </a>
+                </li>
+                <li class="menu-item ">
+                    <a class="menu-link" href="{% url 'sales_report' %}"> <i class="icon material-icons md-monetization_on"></i>
+                        <span class="text">sales report</span>
                     </a>
                 </li>
                 <li class="menu-item ">

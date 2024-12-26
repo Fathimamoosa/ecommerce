@@ -10,7 +10,7 @@
     <h1>Payment Successful</h1>
     <p>Thank you for your payment!</p>
     <p>Order Number: {{ order.order_number }}</p>
-    <p>Total Amount Paid: ₹{{ order.total_price }}</p>
+    <p>Total Amount Paid: ₹ {{ total_price_after_discount|floatformat:2 }}</p>
     <a href="{% url 'orders:order_list' %}">View Orders</a>
 </body>
 </html>

@@ -15,7 +15,7 @@
                     </div>
                     <div class="card-body">
                         <p class="mt-4 px-3 text-center">You have selected online payment. 
-                            Click on the Pay button to make your payment of ₹ {{ total_price }}.</p>
+                            Click on the Pay button to make your payment of ₹ {{ total_price_after_discount|floatformat:2 }}.</p>
                         <div class="text-center">
                             <button id="rzp-button1" class="btn btn-info btn-lg mt-3">Pay</button>
                         </div>

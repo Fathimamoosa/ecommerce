@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 # Create your views here.
 
 def payment_success(request):
+    print('sucesspage')
     return render(request, "payments/payment_success.html", {})
 
 def payment(request):
@@ -61,7 +62,7 @@ def payment_callback(request):
             order.razorpay_payment_id = razorpay_payment_id
             order.razorpay_signature = razorpay_signature
             order.save()
-
+            print('successurl')
             return render(request, 'orders/success.html', {"order_number": order.order_number, "total_price" : order.total_price})
         except razorpay.errors.SignatureVerificationError:
             return JsonResponse({"error": "Payment verification failed"}, status=400)

@@ -1,4 +1,5 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -319,6 +320,7 @@
 
         /* Responsive Grid */
         .row {
+			width: 100%;
             margin-right: -15px;
             margin-left: -15px;
             display: flex;
@@ -354,7 +356,7 @@
         }
 .isotope-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 20px;
     width: 100%;
 }
@@ -439,7 +441,7 @@
 					
 					<!-- Logo desktop -->		
 					<a href="#" class="logo">
-						<img src="images/icons/logo.jpg" alt="IMG-LOGO">
+						<img src="{% static 'frontend/asset/images/logo.svg' %}" alt="IMG-SAMAYA">
 					</a>
 
 					<!-- Menu desktop -->
@@ -846,56 +848,57 @@
 					</div>
 				</div>
 			</div>
-<h2>Products</h2>
-<div class="layout-container">
-    <div class="row isotope-grid">
-        {% if variants %}
-        <h2>
-            {% if query %}
-                Search Results for "{{ query }}"
-            {% else %}
-                All Products
-            {% endif %}
-        </h2>
-        <ul>
-            {% for variant in variants %}
-            <div class="col-6 col-md-4 col-lg-3 p-b-35 isotope-item {{ variant.product.category.name|lower }}">
-                <div class="block2">
-                    <div class="block2-pic hov-img0">
-                        {% if variant.product.images.first %}
-                            <img src="{{ variant.product.images.first.image.url }}" alt="{{ variant.product.product_name }}">
-                        {% else %}
-                            <img src="{% static 'frontend/asset/images/default_image.jpg' %}" alt="Default Image">
-                        {% endif %}
 
-                        <a href="{% url 'product_detail' variant.id %}" class="quick-view-btn">Quick View</a>
-                    </div>
-                    <div class="block2-txt flex-w flex-t p-t-14">
-                        <div class="block2-txt-child1 flex-col-l">
-                            <a href="{% url 'product_detail' variant.id %}" class="product-name">
-                                {{ variant.product.product_name }}
-                            </a>
-                            <span class="product-price">Rs{{ variant.price }}</span>
-                            <a href="{% url 'product_detail' variant.id %}" class="view-details-btn">View Details</a>
-                        </div>
-                        <div class="block2-txt-child2 flex-r p-t-3">
-                            <a href="{% url 'products:add_to_wishlist' variant.id %}" class="add-to-wishlist">
-                                <img src="{% static 'frontend/asset/images/icons/icon-heart-01.png' %}" alt="Wishlist Icon">
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p>No products found{% if query %} matching "{{ query }}"{% endif %}.</p>
-        {% endif %}
-    </div>
-</div>
+			<div class="layout-container">
+				<div class="row ">
+					{% if variants %}
+					<h2>
+						{% if query %}
+							Search Results for "{{ query }}"
+						{% else %}
+							All Products
+						{% endif %}
+					</h2>
+					<ul class="isotope-grid">
+						{% for variant in variants %}
+						<div class="col-6 col-md-4 col-lg-3 p-b-35 isotope-item {{ variant.product.category.name|lower }}">
+							<div class="block2">
+								<div class="block2-pic hov-img0">
+									{% if variant.product.images.first %}
+										<img src="{{ variant.product.images.first.image.url }}" alt="{{ variant.product.product_name }}">
+									{% else %}
+										<img src="{% static 'frontend/asset/images/default_image.jpg' %}" alt="Default Image">
+									{% endif %}
 
+									<a href="{% url 'product_detail' variant.id %}" class="quick-view-btn">Quick View</a>
+								</div>
+								<div class="block2-txt flex-w flex-t p-t-14">
+									<div class="block2-txt-child1 flex-col-l">
+										<a href="{% url 'product_detail' variant.id %}" class="product-name">
+											{{ variant.product.product_name }}
+										</a>
+										<span class="product-price">
+											Rs {{ variant.price }}
+										</span>
+										<!-- <span class="product-price">Rs{{ variant.price }}</span> -->
+										<a href="{% url 'product_detail' variant.id %}" class="view-details-btn">View Details</a>
+									</div>
+									<div class="block2-txt-child2 flex-r p-t-3">
+										<a href="{% url 'products:add_to_wishlist' variant.id %}" class="add-to-wishlist">
+											<img src="{% static 'frontend/asset/images/icons/icon-heart-01.png' %}" alt="Wishlist Icon">
+										</a>
+									</div>
+								</div>
+							</div>
+						</div>
+						{% endfor %}
+					</ul>
+					{% else %}
+					<p>No products found{% if query %} matching "{{ query }}"{% endif %}.</p>
+					{% endif %}
+				</div>
+			</div>
 			
-	
 				<!-- Filter Sidebar
 				<aside class="filter-sidebar">
 					<h3>Filter by Categories</h3>
@@ -932,7 +935,7 @@
     			<ul>
 				{% for variant in variants %}
 				<div class="col-6 col-md-4 col-lg-3 p-b-35 isotope-item {{ variant.product.category.name|lower }}">
-					<!-- Block2 -->
+					 Block2 -->
 					<!-- <div class="block2">
 						
 						<div class="block2-pic hov-img0">
@@ -942,7 +945,7 @@
 								<img src="{% static 'frontend/asset/images/default_image.jpg' %}" alt="Default Image">
 							{% endif %}
 
-							<!-- {% if variant.product.images.all %}
+							 {% if variant.product.images.all %}
 							<img src="{{ variant.product.images.all.0.image.url }}" alt="{{ product.product_name }}">
 									{% else %}
 										<img src="{% static 'frontend/asset/images/default_image.jpg' %}" alt="Default Image">
@@ -968,12 +971,12 @@
 					</div>
 				</div>
 				{% endfor %}
-				<!-- <p>No products found{% if query %} matching "{{ query }}"{% endif %}.</p> -->
+				 <p>No products found{% if query %} matching "{{ query }}"{% endif %}.</p> -->
 			<!-- </div>
 			</ul>
 			{% endif %}
 
-		</div> --> --> --> -->
+		</div> --> 
 </section>
 <!-- <footer> -->
 <footer class="bg3 p-t-75 p-b-32">
@@ -1254,8 +1257,6 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 								</div>
 							</div>	
 						</div>
-
-						<!--  -->
 						<div class="flex-w flex-m p-l-100 p-t-40 respon7">
 							<div class="flex-m bor9 p-r-10 m-r-11">
 								<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100" data-tooltip="Add to Wishlist">

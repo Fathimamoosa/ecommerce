@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'brand',
     'rest_framework',
     'coupons',
+    'wallet',
+    'offers',
 ]
 
 MIDDLEWARE = [
@@ -237,3 +239,10 @@ SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapt
 RAZORPAY_API_KEY = 'rzp_test_7CTaXaqM6vEWGm'
 RAZORPAY_API_SECRET = 'Hs0Uxa1b9J51u1xuTx5EzyfE'
 
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SESSION_COOKIE_SAMESITE = 'Lax'  # Allows cookies to persist for Razorpay redirects
+SESSION_COOKIE_SECURE = True     # Required if your site is running on HTTPS
+CSRF_COOKIE_SECURE = True        # CSRF cookie secure for HTTPS
+
+
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"

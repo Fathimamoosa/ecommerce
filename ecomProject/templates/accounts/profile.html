@@ -243,7 +243,7 @@
 							</li>
 
 							<li class="label1" data-label1="hot">
-								<a href="shoping-cart.html">Features</a>
+								<a href="{% url 'cart_summary' %}">Features</a>
 							</li>
 
 
@@ -457,10 +457,22 @@
         <div class="sidebar3">
             <a href="{% url 'profile' %}" class="nav-item active">Profile</a>
             <a href="{% url 'user_addresses' %}" class="nav-item">Shipping Address</a>
-            <a href="" class="nav-item">My Wallet</a>
+            <a href="{% url 'wallet:my_wallet' %}" class="nav-item">My Wallet</a>
             <a href="{% url 'orders' %}" class="nav-item">Orders</a>
             <a href="{% url 'change_password' %}" class="nav-item">Change Password</a>
-            <a href="{% url 'account_login' %}" class="nav-item logout">Logout</a>
+            {% if user.is_authenticated %}
+					<form method="POST" action="{% url 'accounts_logout' %}">
+						{% csrf_token %}
+						<button type="submit">Logout</button>
+					</form>
+					{% else  %}
+						<a href="{% url 'accounts_login' %}" class="nav-item logout">
+							login
+						</a>
+						<a href="{% url 'accounts_register' %}" class="nav-item logout">
+							Register
+						</a>
+					{% endif %}
         </div>
 
         <div class="profile-details"> 

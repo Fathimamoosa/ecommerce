@@ -4,6 +4,7 @@ from . import views
 from django.conf import settings
 from django.conf.urls.static import static
 
+
 # app_name = 'custom_admin'
 
 
@@ -20,6 +21,11 @@ urlpatterns = [
     path('categories/<int:pk>/update/', views.category_update, name='category_update'),
     path('categories/<int:pk>/delete/', views.category_delete, name='category_delete'),
     path('categories/<int:pk>/restore/', views.restore_category, name='category_restore'),
+    path('sales-report/', views.sales_report, name='sales_report'),
+    path('sales-report-pdf/', views.sales_report_pdf, name='sales_report_pdf'),
+    path('sales-report-excel/', views.sales_report_excel, name='sales_report_excel'),
+    path("dashboard/", views.dashboard, name="dashboard"),
+    path('sales-data/', views.get_sales_data, name='sales_data'),
 ]
 
 if settings.DEBUG:
