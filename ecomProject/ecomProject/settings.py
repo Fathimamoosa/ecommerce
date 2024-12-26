@@ -115,14 +115,15 @@ WSGI_APPLICATION = 'ecomProject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'newdata',
-        'USER': 'admin',
-        'PASSWORD': 'root',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': config('ENGINE', default='django.db.backends.postgresql'),
+        'NAME': config('NAME', default='default_db'),
+        'USER': config('USER', default='default_user'),
+        'PASSWORD': config('PASSWORD', default='default_password'),
+        'HOST': config('HOST', default='localhost'),
+        'PORT': config('PORT', default='5432'),
     }
 }
+
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
